@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1011</width>
+    <height>822</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Solar System LRGB Aligner</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1,0">
+    <property name="spacing">
+     <number>6</number>
+    </property>
+    <item>
+     <layout class="QGridLayout" name="gridLayout_2"/>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="controlButtons">
+      <property name="title">
+       <string/>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="1" column="0">
+        <widget class="QPushButton" name="buttonLoadBW">
+         <property name="toolTip">
+          <string>Select and load file of B/W reference image</string>
+         </property>
+         <property name="text">
+          <string>Load B/W image</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="buttonLoadColor">
+         <property name="toolTip">
+          <string>Select and load file of color image to be registered with B/W image</string>
+         </property>
+         <property name="text">
+          <string>Load color image</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="buttonSaveRegisteredColorImage">
+         <property name="toolTip">
+          <string>Save registered color image to disk</string>
+         </property>
+         <property name="text">
+          <string>Save registered color image</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="buttonSetConfigParams">
+         <property name="toolTip">
+          <string>Select parameters for two-stage registration process (rigid transform and pixelwise match)</string>
+         </property>
+         <property name="text">
+          <string>Set configuration parameters</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="ImageWindow">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="selectImage">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <property name="title">
+       <string>Select image to be displayed</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QRadioButton" name="radioShowBW">
+         <property name="toolTip">
+          <string>Show the B/W reference image (use mouse wheel for zooming, left mouse button for panning)</string>
+         </property>
+         <property name="text">
+          <string>B/W</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioShowColorOrig">
+         <property name="toolTip">
+          <string>Show the original color image to be registered (use mouse wheel for zooming, left mouse button for panning)</string>
+         </property>
+         <property name="text">
+          <string>Color original</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioShowColorRigidTransform">
+         <property name="toolTip">
+          <string>Show the color image after rigid transformation (use mouse wheel for zooming, left mouse button for panning)</string>
+         </property>
+         <property name="text">
+          <string>Color rigid transformation</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioShowColorOptFlow">
+         <property name="toolTip">
+          <string>Show the finally registered color image (use mouse wheel for zooming, left mouse button for panning)</string>
+         </property>
+         <property name="text">
+          <string>Color pixelwise matched</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radioShowMatches">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Show the keypoints and their matches used for rigid transformation (use mouse wheel for zooming, left mouse button for panning)</string>
+         </property>
+         <property name="text">
+          <string>Keypoint matches</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
