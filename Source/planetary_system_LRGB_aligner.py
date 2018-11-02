@@ -127,20 +127,20 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        refFilename = "Images/2018-03-24_20-00MEZ_Mond.jpg"
-        print("Reading reference image : ", refFilename)
-        self.image_reference = cv2.imread(refFilename, cv2.IMREAD_COLOR)
-        self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
-        self.set_status(1)
+        # refFilename = "Images/2018-03-24_20-00MEZ_Mond.jpg"
+        # print("Reading reference image : ", refFilename)
+        # self.image_reference = cv2.imread(refFilename, cv2.IMREAD_COLOR)
+        # self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
+        # self.set_status(1)
 
-        # try:
-        #     self.image_reference = self.load_image("Load B/W reference image")
-        #     self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
-        #     self.set_status(1)
-        # except:
-        #     self.image_reference = None
-        #     self.image_reference_gray = None
-        #     self.set_status(0)
+        try:
+            self.image_reference = self.load_image("Load B/W reference image")
+            self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
+            self.set_status(1)
+        except:
+            self.image_reference = None
+            self.image_reference_gray = None
+            self.set_status(0)
 
 
     def load_color_image(self):
@@ -150,20 +150,20 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        imFilename = "Images/2018-03-24_21-01MEZ_Mond.jpg"
-        print("Reading image to align : ", imFilename)
-        self.image_target = cv2.imread(imFilename, cv2.IMREAD_COLOR)
-        self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
-        self.set_status(2)
+        # imFilename = "Images/2018-03-24_21-01MEZ_Mond.jpg"
+        # print("Reading image to align : ", imFilename)
+        # self.image_target = cv2.imread(imFilename, cv2.IMREAD_COLOR)
+        # self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
+        # self.set_status(2)
 
-        # try:
-        #     self.image_target = self.load_image("Load color image to be registered")
-        #     self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
-        #     self.set_status(2)
-        # except:
-        #     self.image_target = None
-        #     self.image_target_gray = None
-        #     self.set_status(1)
+        try:
+            self.image_target = self.load_image("Load color image to be registered")
+            self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
+            self.set_status(2)
+        except:
+            self.image_target = None
+            self.image_target_gray = None
+            self.set_status(1)
 
     def load_image(self, message, color=False):
         """
@@ -185,11 +185,38 @@ class LrgbAligner(QtWidgets.QMainWindow):
             return cv2.imread(filename[0])
 
     def save_registered_image(self):
-        cv2.imwrite("Images\image_reference_gray", self.image_reference_gray)
-        cv2.imwrite("D:\SW-Development\Python\LRGB_Registration\Source\Images\image_rigid_transformed_gray", self.image_rigid_transformed_gray)
-        # Todo: insert File chooser to get filename, and store the image!
-        # cv2.imwrite(str(filename), image)
+        """
+        Open a file chooser dialog and save the de-warped image.
+
+        :return: -
+        """
+
+        self.save_image("Select location to store the registered color image",
+                        self.image_dewarped)
+        # Udpate the status line.
         self.set_status(5)
+
+    def save_image(self, message, image):
+        """
+        Open a file chooser. If a valid file name is selected, store the image to that location.
+
+        :param message: Text to be displayed in the file chooser window.
+        :param image: Image file
+        :return: -
+        """
+
+        options = QtWidgets.QFileDialog.Options()
+        filename = QtWidgets.QFileDialog.getSaveFileName(self, message, self.home,
+                                                         "Images (*.tif *.tiff *.png *.xpm *.jpg)",
+                                                         options=options)
+        # Store image only if the chooser did not return with a cancel.
+        if filename[0] != "":
+            my_file = Path(filename[0])
+            if my_file.is_file():
+            # Todo: Remove does not work yet!
+                os.remove(my_file)
+            cv2.imwrite(filename[0], image)
+
 
     def set_status(self, status):
         """

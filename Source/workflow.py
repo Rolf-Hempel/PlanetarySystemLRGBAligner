@@ -123,9 +123,9 @@ class Workflow(QtCore.QThread):
                     cv2.cvtColor(self.gui.image_rigid_transformed, cv2.COLOR_BGR2GRAY)
 
                 # Write aligned image to disk.
-                outFilename = "Images/2018-03-24_21-01MEZ_Mond_aligned.jpg"
-                print("Saving aligned image : ", outFilename)
-                cv2.imwrite(outFilename, self.gui.image_rigid_transformed)
+                # outFilename = "Images/2018-03-24_21-01MEZ_Mond_aligned.jpg"
+                # print("Saving aligned image : ", outFilename)
+                # cv2.imwrite(outFilename, self.gui.image_rigid_transformed)
 
                 # Signal the GUI that the homography computation is finished.
                 self.set_status_signal.emit(3)
@@ -133,9 +133,9 @@ class Workflow(QtCore.QThread):
                 self.gui.image_dewarped = self.deWarp()
 
                 # Write de-warped image to disk.
-                outFilename = "Images/2018-03-24_21-01MEZ_Mond_dewarped.jpg"
-                print("Saving de-warped image : ", outFilename)
-                cv2.imwrite(outFilename, self.gui.image_dewarped)
+                # outFilename = "Images/2018-03-24_21-01MEZ_Mond_dewarped.jpg"
+                # print("Saving de-warped image : ", outFilename)
+                # cv2.imwrite(outFilename, self.gui.image_dewarped)
 
                 # Signal the GUI that the optical flow has been applied to the target image.
                 self.set_status_signal.emit(4)
