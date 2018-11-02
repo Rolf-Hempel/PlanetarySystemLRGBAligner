@@ -23,12 +23,14 @@ along with PSLA.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 from time import sleep
 import cv2
+from pathlib import Path
+import numpy as np
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from main_gui import Ui_MainWindow
 from configuration import Configuration
-from configuration_editor import ConfigurationEditor
+# from configuration_editor import ConfigurationEditor
 from workflow import Workflow
 
 
@@ -51,7 +53,6 @@ class LrgbAligner(QtWidgets.QMainWindow):
         QtWidgets.QWidget.__init__(self, parent)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.setChildrenFocusPolicy(QtCore.Qt.NoFocus)
 
         # Connect main GUI events with method invocations.
         self.ui.buttonLoadBW.clicked.connect(self.load_bw_image)
@@ -59,19 +60,23 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.ui.buttonSetConfigParams.clicked.connect(self.edit_configuration)
         self.ui.buttonSaveRegisteredColorImage.clicked.connect(self.save_registered_image)
 
+        # Set the path to the home directory:
+        self.home = str(Path.home())
 
-        self.stati = [self.initialized,              # 0
-                      self.bw_loaded,                # 1
-                      self.color_loaded,             # 2
-                      self.rigid_transformed,        # 3
-                      self.optical_flow_computed,    # 4
-                      self.results_written]          # 5
+        # Initialize status variables
+        self.status_list = [False, False, False, False, False, False]
+        self.status_pointer = {"initialized": 0,
+                               "bw_loaded": 1,
+                               "color_loaded": 2,
+                               "rigid_transformed": 3,
+                               "optical_flow_computed": 4,
+                               "results_written": 5}
 
-        self.radio_buttons = [self.radioShowBW,                   # 0
-                              self.radioShowColorOrig,            # 1
-                              self.radioShowColorRigidTransform,  # 2
-                              self.radioShowMatches,              # 3
-                              self.radioShowColorOptFlow]         # 4
+        self.radio_buttons = [self.ui.radioShowBW,                   # 0
+                              self.ui.radioShowColorOrig,            # 1
+                              self.ui.radioShowColorRigidTransform,  # 2
+                              self.ui.radioShowMatches,              # 3
+                              self.ui.radioShowColorOptFlow]         # 4
 
 
         self.max_button = [0, 1, 2, 4, 5, 5]
@@ -93,8 +98,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         # the appropriate GUI activity.
         self.workflow.set_status_signal.connect(self.set_status)
 
-        # Mark process as initialized, and invalidate downstream tasks.
-        self.initialized = True
+        # Reset downstream status flags.
         self.set_status(0)
 
     def edit_configuration(self):
@@ -106,7 +110,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        editor = ConfigurationEditor(self.configuration)
+        # editor = ConfigurationEditor(self.configuration)
+        editor = None
         editor.exec_()
         if editor.configuration_changed:
             # If parameters have changed, a new alignment has to be computed. If both images are
@@ -122,9 +127,21 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        self.image_reference = self.load_image()
+        refFilename = "Images/2018-03-24_20-00MEZ_Mond.jpg"
+        print("Reading reference image : ", refFilename)
+        self.image_reference = cv2.imread(refFilename, cv2.IMREAD_COLOR)
         self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
         self.set_status(1)
+
+        # try:
+        #     self.image_reference = self.load_image("Load B/W reference image")
+        #     self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
+        #     self.set_status(1)
+        # except:
+        #     self.image_reference = None
+        #     self.image_reference_gray = None
+        #     self.set_status(0)
+
 
     def load_color_image(self):
         """
@@ -133,11 +150,22 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        self.image_target = self.load_image()
+        imFilename = "Images/2018-03-24_21-01MEZ_Mond.jpg"
+        print("Reading image to align : ", imFilename)
+        self.image_target = cv2.imread(imFilename, cv2.IMREAD_COLOR)
         self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
         self.set_status(2)
 
-    def load_image(self, color=False):
+        # try:
+        #     self.image_target = self.load_image("Load color image to be registered")
+        #     self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
+        #     self.set_status(2)
+        # except:
+        #     self.image_target = None
+        #     self.image_target_gray = None
+        #     self.set_status(1)
+
+    def load_image(self, message, color=False):
         """
         Read an image from a file. Convert it to color mode if optional parameter is set to True.
 
@@ -145,18 +173,22 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: Numpy array with image data
         """
 
-        # Todo: insert File chooser to get filename!
         options = QtWidgets.QFileDialog.Options()
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, "Open Image", "/home/rolf",
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, message, self.home,
                                                   "Images (*.tif *.tiff *.png *.xpm *.jpg)",
                                                   options=options)
+        if filename[0] == '':
+            raise Exception("File dialog aborted")
         if color:
-            return cv2.imread(filename, cv2.IMREAD_COLOR)
+            return cv2.imread(filename[0], cv2.IMREAD_COLOR)
         else:
-            return cv2.imread(filename)
+            return cv2.imread(filename[0])
 
     def save_registered_image(self):
+        cv2.imwrite("Images\image_reference_gray", self.image_reference_gray)
+        cv2.imwrite("D:\SW-Development\Python\LRGB_Registration\Source\Images\image_rigid_transformed_gray", self.image_rigid_transformed_gray)
         # Todo: insert File chooser to get filename, and store the image!
+        # cv2.imwrite(str(filename), image)
         self.set_status(5)
 
     def set_status(self, status):
@@ -171,9 +203,15 @@ class LrgbAligner(QtWidgets.QMainWindow):
         # Store current status.
         self.current_status = status
 
-        # Reset all downstream status variables to False.
-        self.stati[status+1 :] = False
+        # Set the current status.
+        self.status_list[status] = True
 
+        # Reset all downstream status variables to False.
+        self.status_list[status+1 :] = [False] * (len(self.status_list)-status-1)
+
+        # Enable radio buttons which can be used at this point:
+        for button in self.radio_buttons[:self.max_button[status]]:
+            button.setEnabled(True)
         # Disable the radio buttons for showing images which do not exist at this point.
         for button in self.radio_buttons[self.max_button[status]:]:
             button.setEnabled(False)
@@ -195,25 +233,27 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-
         status_text = ""
 
         # Tell if input images are loaded.
-        if self.bw_loaded:
-            if self.color_loaded:
+        if self.status_list[self.status_pointer["initialized"]]:
+            status_text += "Process initialized"
+
+        # Tell if input images are loaded.
+        if self.status_list[self.status_pointer["bw_loaded"]]:
+            if self.status_list[self.status_pointer["color_loaded"]]:
                 status_text += ", B/W reference and color frames loaded"
             else:
                 status_text += ", B/W reference frame loaded"
 
         # Tell if rigid transformation is done.
-        if self.rigid_transformed:
-            if self.optical_flow_computed:
-                status_text += ", images pixel-wise aligned"
-            else:
-                status_text += ", rigid transformation computed"
+        if self.status_list[self.status_pointer["rigid_transformed"]]:
+            status_text += ", rigid transformation computed"
+        if self.status_list[self.status_pointer["optical_flow_computed"]]:
+            status_text += ", images pixel-wise aligned"
 
         # Tell if results are written to disk.
-        if self.results_written:
+        if self.status_list[self.status_pointer["results_written"]]:
             status_text += ", results written to disk"
 
         # Write the complete message to the status bar.
@@ -228,7 +268,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        self.exit_program(event=evnt)
+        sys.exit(0)
 
 if __name__ == "__main__":
     # The following four lines are a workaround to make PyInstaller work. Remove them when the

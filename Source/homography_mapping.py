@@ -7,6 +7,8 @@ GOOD_MATCH_PERCENT = 0.1
 
 def alignImages(im1, im2):
     # Convert images to grayscale
+    # im1: Color image to be aligned
+    # im2: Reference image
     im1Gray = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
     im2Gray = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
 
@@ -35,7 +37,7 @@ def alignImages(im1, im2):
 
     # Draw top matches
     imMatches = cv2.drawMatches(im1, keypoints1, im2, keypoints2, matches, None)
-    cv2.imwrite("matches.jpg", imMatches)
+    cv2.imwrite("Images/matches.jpg", imMatches)
 
     # Extract location of good matches
     points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -96,12 +98,12 @@ def warp_flow(img, flow):
 
 if __name__ == '__main__':
     # Read reference image
-    refFilename = "2018-03-24_20-00MEZ_Mond.jpg"
+    refFilename = "Images/2018-03-24_20-00MEZ_Mond.jpg"
     print("Reading reference image : ", refFilename)
     imReference = cv2.imread(refFilename, cv2.IMREAD_COLOR)
 
     # Read image to be aligned
-    imFilename = "2018-03-24_21-01MEZ_Mond.jpg"
+    imFilename = "Images/2018-03-24_21-01MEZ_Mond.jpg"
     print("Reading image to align : ", imFilename)
     im = cv2.imread(imFilename, cv2.IMREAD_COLOR)
 
@@ -111,7 +113,7 @@ if __name__ == '__main__':
     imReg, h = alignImages(im, imReference)
 
     # Write aligned image to disk.
-    outFilename = "2018-03-24_21-01MEZ_Mond_aligned.jpg"
+    outFilename = "Images/2018-03-24_21-01MEZ_Mond_aligned.jpg"
     print("Saving aligned image : ", outFilename)
     cv2.imwrite(outFilename, imReg)
 
@@ -120,6 +122,6 @@ if __name__ == '__main__':
 
     imDewarped = deWarp(imReg, imReference)
     # Write de-warped image to disk.
-    outFilename = "2018-03-24_21-01MEZ_Mond_dewarped.jpg"
+    outFilename = "Images/2018-03-24_21-01MEZ_Mond_dewarped.jpg"
     print("Saving de-warped image : ", outFilename)
     cv2.imwrite(outFilename, imDewarped)

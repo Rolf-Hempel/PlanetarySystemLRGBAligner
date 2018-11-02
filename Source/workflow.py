@@ -80,12 +80,12 @@ class Workflow(QtCore.QThread):
                 ny = self.configuration.feature_patch_grid_size_y
                 nx = self.configuration.feature_patch_grid_size_x
 
-                keypoints1 = self.getKeypoints(orb, self.gui.image_reference_gray, ny, nx)
-                keypoints2 = self.getKeypoints(orb, self.gui.image_target_gray, ny, nx)
+                keypoints1 = self.getKeypoints(orb, self.gui.image_target_gray, ny, nx)
+                keypoints2 = self.getKeypoints(orb, self.gui.image_reference_gray, ny, nx)
 
                 # Compute the descriptors with ORB.
-                keypoints1, descriptors1 = orb.compute(self.gui.image_reference_gray, keypoints1)
-                keypoints2, descriptors2 = orb.compute(self.gui.image_target_gray, keypoints2)
+                keypoints1, descriptors1 = orb.compute(self.gui.image_target_gray, keypoints1)
+                keypoints2, descriptors2 = orb.compute(self.gui.image_reference_gray, keypoints2)
 
                 # Match features.
                 matcher = cv2.BFMatcher(self.configuration.feature_matching_norm,
@@ -100,8 +100,8 @@ class Workflow(QtCore.QThread):
                 matches = matches[:numGoodMatches]
 
                 # Draw top matches
-                self.gui.image_matches = cv2.drawMatches(self.gui.image_reference, keypoints1,
-                                                         self.gui.image_target, keypoints2,
+                self.gui.image_matches = cv2.drawMatches(self.gui.image_target, keypoints1,
+                                                         self.gui.image_reference, keypoints2,
                                                          matches, None)
 
                 # Extract location of good matches.
@@ -116,16 +116,26 @@ class Workflow(QtCore.QThread):
                 h, mask = cv2.findHomography(points1, points2, self.configuration.match_weighting)
 
                 # Apply homography on target image.
-                height, width, channels = self.gui.image_target.shape
-                self.gui.image_rigid_transformed = cv2.warpPerspective(self.gui.image_reference,
+                height, width, channels = self.gui.image_reference.shape
+                self.gui.image_rigid_transformed = cv2.warpPerspective(self.gui.image_target,
                                                                        h, (width, height))
                 self.gui.image_rigid_transformed_gray = \
                     cv2.cvtColor(self.gui.image_rigid_transformed, cv2.COLOR_BGR2GRAY)
+
+                # Write aligned image to disk.
+                outFilename = "Images/2018-03-24_21-01MEZ_Mond_aligned.jpg"
+                print("Saving aligned image : ", outFilename)
+                cv2.imwrite(outFilename, self.gui.image_rigid_transformed)
 
                 # Signal the GUI that the homography computation is finished.
                 self.set_status_signal.emit(3)
 
                 self.gui.image_dewarped = self.deWarp()
+
+                # Write de-warped image to disk.
+                outFilename = "Images/2018-03-24_21-01MEZ_Mond_dewarped.jpg"
+                print("Saving de-warped image : ", outFilename)
+                cv2.imwrite(outFilename, self.gui.image_dewarped)
 
                 # Signal the GUI that the optical flow has been applied to the target image.
                 self.set_status_signal.emit(4)
