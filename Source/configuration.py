@@ -57,10 +57,17 @@ class Configuration:
         """
 
         # Parameters used for rigid transformation.
+        # Number of patches in y direction for feature detection. Features are detected in each
+        # patch separately. This leads to a more uniform feature distribution.
         self.feature_patch_grid_size_y = 4    # between 1 and 10
+        # Number of patches in x direction for feature detection. Features are detected in each
+        # patch separately. This leads to a more uniform feature distribution.
         self.feature_patch_grid_size_x = 3    # between 1 and 10
+        # Maximal number of features to be detected per patch.
         self.max_features = 100               # between 10 and 200
+        # Fraction of detected features to be selected for homography matrix computation.
         self.good_match_fraction = 0.1        # between 0.05 and 1.
+        # Weighting method used in solving the over-determined homography matrix problem.
         self.match_weighting = cv2.LMEDS      # either cv2.RANSAC for "random sample consensus"
                                               # or cv2.LMEDS for "least median of squares"
 
@@ -80,7 +87,7 @@ class Configuration:
         # values mean that the image will be approximated with smoother surfaces, yielding more
         # robust algorithm and more blurred motion field, typically poly_n =5 or 7.
         self.poly_n=5                         # between 3 and 10
-        # standard deviation of the Gaussian that is used to smooth derivatives used as a basis
+        # Standard deviation of the Gaussian that is used to smooth derivatives used as a basis
         # for the polynomial expansion; for poly_n=5, you can set poly_sigma=1.1, for poly_n=7,
         # a good value would be poly_sigma=1.5.
         self.poly_sigma=1.1                   # between 1. and 2.
