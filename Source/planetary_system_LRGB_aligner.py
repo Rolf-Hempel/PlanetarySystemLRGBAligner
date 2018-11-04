@@ -57,29 +57,54 @@ class LrgbAligner(QtWidgets.QMainWindow):
         # Connect main GUI events with method invocations.
         self.ui.buttonLoadBW.clicked.connect(self.load_bw_image)
         self.ui.buttonLoadColor.clicked.connect(self.load_color_image)
+        self.ui.buttonRegistration.clicked.connect(self.compute_registration)
+        self.ui.buttonComputeLRGB.clicked.connect(self.compute_lrgb)
         self.ui.buttonSetConfigParams.clicked.connect(self.edit_configuration)
         self.ui.buttonSaveRegisteredColorImage.clicked.connect(self.save_registered_image)
+        self.ui.buttonSaveLRGB.clicked.connect(self.save_lrgb_image)
+        self.ui.buttonExit.clicked.connect(self.closeEvent)
 
-        # Set the path to the home directory:
+        # Set the path to the home directory.
         self.home = str(Path.home())
 
+        # Initialize instance variables.
+        self.image_reference = None
+        self.image_reference_gray = None
+        self.image_target = None
+        self.image_target_gray = None
+        self.image_dewarped = None
+        self.image_lrgb = None
+
         # Initialize status variables
-        self.status_list = [False, False, False, False, False, False]
+        self.status_list = [False, False, False, False, False, False, False, False]
         self.status_pointer = {"initialized": 0,
                                "bw_loaded": 1,
                                "color_loaded": 2,
                                "rigid_transformed": 3,
                                "optical_flow_computed": 4,
-                               "results_written": 5}
+                               "lrgb_computed": 5,
+                               "results_saved": 6}
 
         self.radio_buttons = [self.ui.radioShowBW,                   # 0
                               self.ui.radioShowColorOrig,            # 1
                               self.ui.radioShowColorRigidTransform,  # 2
                               self.ui.radioShowMatches,              # 3
-                              self.ui.radioShowColorOptFlow]         # 4
+                              self.ui.radioShowColorOptFlow,         # 4
+                              self.ui.radioShowLRGB]                 # 5
 
+        self.control_buttons = [self.ui.buttonSetConfigParams,            # 0
+                                self.ui.buttonLoadBW,                     # 1
+                                self.ui.buttonLoadColor,                  # 2
+                                self.ui.buttonRegistration,               # 3
+                                self.ui.buttonSaveRegisteredColorImage,   # 4
+                                self.ui.buttonComputeLRGB,                # 5
+                                self.ui.buttonSaveLRGB,                   # 6
+                                self.ui.buttonExit]                       # 7
 
-        self.max_button = [0, 1, 2, 4, 5, 5]
+        self.max_button = [0, 1, 2, 4, 5, 6, 6]
+        self.max_control_button = [2, 3, 4, 4, 6, 7, 8]
+
+        self.status_busy = False
 
         # Read in or (if no config file is found) create all configuration parameters. If a new
         # configuration has been created, write it to disk.
@@ -94,8 +119,9 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.workflow = Workflow(self)
         sleep(self.configuration.wait_for_workflow_initialization)
 
-        # The workflow thread sends signals when a task is finished. Connect those signals with
-        # the appropriate GUI activity.
+        # The workflow thread sends signals when it is busy and when a task is finished. Connect
+        # those signals with the appropriate GUI activity.
+        self.workflow.set_status_busy_signal.connect(self.set_busy)
         self.workflow.set_status_signal.connect(self.set_status)
 
         # Reset downstream status flags.
@@ -138,9 +164,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
             self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
             self.set_status(1)
         except:
-            self.image_reference = None
-            self.image_reference_gray = None
-            self.set_status(0)
+            pass
 
 
     def load_color_image(self):
@@ -161,9 +185,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
             self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
             self.set_status(2)
         except:
-            self.image_target = None
-            self.image_target_gray = None
-            self.set_status(1)
+            pass
 
     def load_image(self, message, color=False):
         """
@@ -184,6 +206,28 @@ class LrgbAligner(QtWidgets.QMainWindow):
         else:
             return cv2.imread(filename[0])
 
+    def compute_registration(self):
+        """
+        If both B/W and color images are available, start the registration process.
+
+        :return: -
+        """
+
+        if self.image_reference is not None and self.image_target is not None:
+            # Tell the workflow thread to compute a new alignment.
+            self.workflow.compute_alignment_flag = True
+
+    def compute_lrgb(self):
+        """
+        If both B/W and color images are available, start the registration process.
+
+        :return: -
+        """
+
+        if self.image_reference is not None and self.image_dewarped is not None:
+            # Tell the workflow thread to compute a new alignment.
+            self.workflow.compute_lrgb_flag = True
+
     def save_registered_image(self):
         """
         Open a file chooser dialog and save the de-warped image.
@@ -191,10 +235,28 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        self.save_image("Select location to store the registered color image",
-                        self.image_dewarped)
-        # Udpate the status line.
-        self.set_status(5)
+        try:
+            self.save_image("Select location to store the registered color image",
+                            self.image_dewarped)
+            # Udpate the status line.
+            self.set_status(6)
+        except:
+            pass
+
+    def save_lrgb_image(self):
+        """
+        Open a file chooser dialog and save the combined LRBG image.
+
+        :return: -
+        """
+
+        try:
+            self.save_image("Select location to store the combined LRGB image",
+                            self.image_lrgb)
+            # Udpate the status line.
+            self.set_status(6)
+        except:
+            pass
 
     def save_image(self, message, image):
         """
@@ -213,10 +275,26 @@ class LrgbAligner(QtWidgets.QMainWindow):
         if filename[0] != "":
             my_file = Path(filename[0])
             if my_file.is_file():
-            # Todo: Remove does not work yet!
-                os.remove(my_file)
+                os.remove(str(my_file))
             cv2.imwrite(filename[0], image)
+        else:
+            raise Exception("File dialog aborted")
 
+    def set_busy(self, busy):
+        """
+        Set the "busy" status flag and update the status bar.
+
+        :param busy: True, if the workflow thread is active in a computation. False, otherwise.
+        :return: -
+        """
+
+        if busy:
+            for button in self.control_buttons[0:7]:
+                button.setEnabled(False)
+        else:
+            self.set_status(self.current_status)
+        self.status_busy = busy
+        self.set_statusbar()
 
     def set_status(self, status):
         """
@@ -236,20 +314,24 @@ class LrgbAligner(QtWidgets.QMainWindow):
         # Reset all downstream status variables to False.
         self.status_list[status+1 :] = [False] * (len(self.status_list)-status-1)
 
-        # Enable radio buttons which can be used at this point:
-        for button in self.radio_buttons[:self.max_button[status]]:
-            button.setEnabled(True)
-        # Disable the radio buttons for showing images which do not exist at this point.
-        for button in self.radio_buttons[self.max_button[status]:]:
-            button.setEnabled(False)
+        if status != 6:
+            # Enable radio buttons which can be used at this point:
+            for button in self.radio_buttons[:self.max_button[status]]:
+                button.setEnabled(True)
+            # Disable the radio buttons for showing images which do not exist at this point.
+            for button in self.radio_buttons[self.max_button[status]:]:
+                button.setEnabled(False)
+
+            if not self.status_busy:
+                # Enable control buttons which can be used at this point:
+                for button in self.control_buttons[:self.max_control_button[status]]:
+                    button.setEnabled(True)
+                # Disable the control buttons which do not make sense at this point.
+                for button in self.control_buttons[self.max_control_button[status]:-1]:
+                    button.setEnabled(False)
 
         # Update the status bar.
         self.set_statusbar()
-
-        # If both images are loaded and parameters are set, start the computation.
-        if status == 2:
-            # Tell the workflow thread to compute a new alignment.
-            self.workflow.compute_alignment_flag = True
 
     def set_statusbar(self):
         """
@@ -279,9 +361,17 @@ class LrgbAligner(QtWidgets.QMainWindow):
         if self.status_list[self.status_pointer["optical_flow_computed"]]:
             status_text += ", images pixel-wise aligned"
 
+        # Tell if the LRGB image is computed.
+        if self.status_list[self.status_pointer["lrgb_computed"]]:
+            status_text += ", LRGB image computed"
+
         # Tell if results are written to disk.
-        if self.status_list[self.status_pointer["results_written"]]:
+        if self.status_list[self.status_pointer["results_saved"]]:
             status_text += ", results written to disk"
+
+        # Tell if the workflow thread is busy at this point.
+        if self.status_busy:
+            status_text += ", busy"
 
         # Write the complete message to the status bar.
         self.ui.statusbar.showMessage(status_text)
@@ -294,7 +384,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :param evnt: event object
         :return: -
         """
-
+        self.workflow.exiting = True
+        sleep(4. * self.configuration.polling_interval)
         sys.exit(0)
 
 if __name__ == "__main__":

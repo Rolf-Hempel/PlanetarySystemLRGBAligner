@@ -38,6 +38,7 @@ class Workflow(QtCore.QThread):
 
     # Define the list of signals with which this thread communicates with the main gui.
     set_status_signal = QtCore.pyqtSignal(int)
+    set_status_busy_signal = QtCore.pyqtSignal(bool)
 
     def __init__(self, gui, parent=None):
         """
@@ -54,6 +55,7 @@ class Workflow(QtCore.QThread):
         # Initialize some status variables.
         self.exiting = False
         self.compute_alignment_flag = False
+        self.compute_lrgb_flag = False
 
         # Initialize some instance variables.
 
@@ -74,6 +76,7 @@ class Workflow(QtCore.QThread):
             # Compute a new image alignment.
             if self.compute_alignment_flag:
                 self.compute_alignment_flag = False
+                self.set_status_busy_signal.emit(True)
 
                 # Detect ORB features and compute descriptors.
                 orb = cv2.ORB_create(self.configuration.max_features)
@@ -138,7 +141,19 @@ class Workflow(QtCore.QThread):
                 # cv2.imwrite(outFilename, self.gui.image_dewarped)
 
                 # Signal the GUI that the optical flow has been applied to the target image.
+                self.set_status_busy_signal.emit(False)
                 self.set_status_signal.emit(4)
+
+            # Compute an LRGB composite from the B/W image and the pixelwise aligned color image.
+            if self.compute_lrgb_flag:
+                self.compute_lrgb_flag = False
+                self.set_status_busy_signal.emit(True)
+                # Todo: Implement LRGB computation
+                print ("Insert LRGB computation here")
+                self.gui.image_lrgb = self.gui.image_dewarped
+                time.sleep(1.)
+                self.set_status_busy_signal.emit(False)
+                self.set_status_signal.emit(5)
 
             # Sleep time inserted to limit CPU consumption by idle looping.
             time.sleep(self.gui.configuration.polling_interval)
