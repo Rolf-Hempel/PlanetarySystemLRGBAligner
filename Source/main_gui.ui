@@ -184,6 +184,16 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
+       <widget class="QPushButton" name="buttonSetConfigParams">
+        <property name="toolTip">
+         <string>Select parameters for two-stage registration process (rigid transform and pixelwise match)</string>
+        </property>
+        <property name="text">
+         <string>Set configuration parameters</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -195,16 +205,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="buttonSetConfigParams">
-        <property name="toolTip">
-         <string>Select parameters for two-stage registration process (rigid transform and pixelwise match)</string>
-        </property>
-        <property name="text">
-         <string>Set configuration parameters</string>
-        </property>
-       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="buttonExit">

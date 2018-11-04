@@ -141,8 +141,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         editor.exec_()
         if editor.configuration_changed:
             # If parameters have changed, a new alignment has to be computed. If both images are
-            # available, set process status to 2. This triggers the computation in the workflow
-            # thread.
+            # available, set process status to 2.
             if self.current_status > 2:
                 self.set_status(2)
 
