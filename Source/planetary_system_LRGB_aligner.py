@@ -32,6 +32,7 @@ from main_gui import Ui_MainWindow
 from configuration import Configuration
 # from configuration_editor import ConfigurationEditor
 from workflow import Workflow
+from photo_viewer import PhotoViewer, Window
 
 
 class LrgbAligner(QtWidgets.QMainWindow):
@@ -54,6 +55,11 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # Insert the photo viewer into the main GUI.
+        self.ImageWindow = PhotoViewer(self)
+        self.ImageWindow.setObjectName("ImageWindow")
+        self.ui.verticalLayout_3.insertWidget(1, self.ImageWindow, stretch=1)
+
         # Connect main GUI events with method invocations.
         self.ui.buttonLoadBW.clicked.connect(self.load_bw_image)
         self.ui.buttonLoadColor.clicked.connect(self.load_color_image)
@@ -74,6 +80,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.image_target_gray = None
         self.image_dewarped = None
         self.image_lrgb = None
+        self.pixmaps = [None, None, None, None]
 
         # Initialize status variables
         self.status_list = [False, False, False, False, False, False, False, False]
@@ -152,15 +159,15 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        # refFilename = "Images/2018-03-24_20-00MEZ_Mond.jpg"
-        # print("Reading reference image : ", refFilename)
-        # self.image_reference = cv2.imread(refFilename, cv2.IMREAD_COLOR)
-        # self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
-        # self.set_status(1)
-
         try:
             self.image_reference = self.load_image("Load B/W reference image")
             self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
+            self.pixmaps[0] = QtGui.QPixmap(
+                QtGui.QImage(self.image_reference, self.image_reference.shape[1],
+                             self.image_reference.shape[0], self.image_reference.shape[1] * 3,
+                             QtGui.QImage.Format_RGB888).rgbSwapped())
+            self.ImageWindow.setPhoto(self.pixmaps[0])
+            self.ImageWindow.fitInView()
             self.set_status(1)
         except:
             pass
@@ -173,15 +180,15 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        # imFilename = "Images/2018-03-24_21-01MEZ_Mond.jpg"
-        # print("Reading image to align : ", imFilename)
-        # self.image_target = cv2.imread(imFilename, cv2.IMREAD_COLOR)
-        # self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
-        # self.set_status(2)
-
         try:
             self.image_target = self.load_image("Load color image to be registered")
             self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
+            self.pixmaps[1] = QtGui.QPixmap(
+                QtGui.QImage(self.image_target, self.image_target.shape[1],
+                             self.image_target.shape[0], self.image_target.shape[1] * 3,
+                             QtGui.QImage.Format_RGB888).rgbSwapped())
+            self.ImageWindow.setPhoto(self.pixmaps[1])
+            self.ImageWindow.fitInView()
             self.set_status(2)
         except:
             pass

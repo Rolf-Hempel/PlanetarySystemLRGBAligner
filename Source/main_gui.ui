@@ -19,13 +19,10 @@
      <pointsize>10</pointsize>
     </font>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,1,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0">
     <property name="spacing">
      <number>6</number>
     </property>
-    <item>
-     <layout class="QGridLayout" name="gridLayout_2"/>
-    </item>
     <item>
      <widget class="QGroupBox" name="controlButtons">
       <property name="title">
@@ -93,13 +90,6 @@
         </widget>
        </item>
       </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="ImageWindow">
-      <property name="text">
-       <string/>
-      </property>
      </widget>
     </item>
     <item>
