@@ -70,8 +70,15 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.ui.buttonSaveLRGB.clicked.connect(self.save_lrgb_image)
         self.ui.buttonExit.clicked.connect(self.closeEvent)
 
-        # Set the path to the home directory.
-        self.home = str(Path.home())
+        self.ui.radioShowBW.clicked.connect(lambda: self.show_pixmap(0))
+        self.ui.radioShowColorOrig.clicked.connect(lambda: self.show_pixmap(1))
+        self.ui.radioShowColorRigidTransform.clicked.connect(lambda: self.show_pixmap(2))
+        self.ui.radioShowMatches.clicked.connect(lambda: self.show_pixmap(3))
+        self.ui.radioShowColorOptFlow.clicked.connect(lambda: self.show_pixmap(4))
+        self.ui.radioShowLRGB.clicked.connect(lambda: self.show_pixmap(5))
+
+        # Initialize the path to the home directory.
+        self.current_dir = str(Path.home())
 
         # Initialize instance variables.
         self.image_reference = None
@@ -80,7 +87,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.image_target_gray = None
         self.image_dewarped = None
         self.image_lrgb = None
-        self.pixmaps = [None, None, None, None]
+        self.pixmaps = [None, None, None, None, None, None]
 
         # Initialize status variables
         self.status_list = [False, False, False, False, False, False, False, False]
@@ -160,14 +167,9 @@ class LrgbAligner(QtWidgets.QMainWindow):
         """
 
         try:
-            self.image_reference = self.load_image("Load B/W reference image")
+            self.image_reference = self.load_image("Load B/W reference image", 0)
             self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
-            self.pixmaps[0] = QtGui.QPixmap(
-                QtGui.QImage(self.image_reference, self.image_reference.shape[1],
-                             self.image_reference.shape[0], self.image_reference.shape[1] * 3,
-                             QtGui.QImage.Format_RGB888).rgbSwapped())
-            self.ImageWindow.setPhoto(self.pixmaps[0])
-            self.ImageWindow.fitInView()
+            self.ui.radioShowBW.setChecked(True)
             self.set_status(1)
         except:
             pass
@@ -181,36 +183,64 @@ class LrgbAligner(QtWidgets.QMainWindow):
         """
 
         try:
-            self.image_target = self.load_image("Load color image to be registered")
+            self.image_target = self.load_image("Load color image to be registered", 1)
             self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
-            self.pixmaps[1] = QtGui.QPixmap(
-                QtGui.QImage(self.image_target, self.image_target.shape[1],
-                             self.image_target.shape[0], self.image_target.shape[1] * 3,
-                             QtGui.QImage.Format_RGB888).rgbSwapped())
-            self.ImageWindow.setPhoto(self.pixmaps[1])
-            self.ImageWindow.fitInView()
+            self.ui.radioShowColorOrig.setChecked(True)
             self.set_status(2)
         except:
             pass
 
-    def load_image(self, message, color=False):
+    def load_image(self, message, pixmap_index, color=False):
         """
         Read an image from a file. Convert it to color mode if optional parameter is set to True.
 
+        :param pixmap_index: Index into the list of pixel maps used to show images in GUI.
         :param color: If True, convert image to color mode.
         :return: Numpy array with image data
         """
 
         options = QtWidgets.QFileDialog.Options()
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, message, self.home,
+        filename = QtWidgets.QFileDialog.getOpenFileName(self, message, self.current_dir,
                                                   "Images (*.tif *.tiff *.png *.xpm *.jpg)",
                                                   options=options)
-        if filename[0] == '':
+        file_name = filename[0]
+        if file_name == '':
             raise Exception("File dialog aborted")
+        # Remember the current directory for next file dialog.
+        self.current_dir = str(Path(file_name).parents[0])
         if color:
-            return cv2.imread(filename[0], cv2.IMREAD_COLOR)
+            image_read =  cv2.imread(file_name, cv2.IMREAD_COLOR)
         else:
-            return cv2.imread(filename[0])
+            image_read = cv2.imread(file_name)
+
+        # Convert image into QT pixmel map, store it in list and load it into GUI viewer.
+        self.pixmaps[pixmap_index] = self.create_pixmap(image_read)
+        self.ImageWindow.setPhoto(self.pixmaps[pixmap_index])
+        self.ImageWindow.fitInView()
+        return image_read
+
+    def create_pixmap(self, cv_image):
+        """
+        Transform an image in OpenCV color representation (BGR) into a QT pixmap
+
+        :param cv_image: Image array
+        :return: QT QPixmap object
+        """
+
+        return QtGui.QPixmap(
+            QtGui.QImage(cv_image, cv_image.shape[1], cv_image.shape[0], cv_image.shape[1] * 3,
+                         QtGui.QImage.Format_RGB888).rgbSwapped())
+
+    def show_pixmap(self, pixmap_index):
+        """
+        Load a pixmap into the GUI image viewer.
+
+        :param pixmap_index: Index of the selected pixmap in the list.
+        :return: -
+        """
+
+        if self.pixmaps[pixmap_index] is not None:
+            self.ImageWindow.setPhoto(self.pixmaps[pixmap_index])
 
     def compute_registration(self):
         """
@@ -274,15 +304,18 @@ class LrgbAligner(QtWidgets.QMainWindow):
         """
 
         options = QtWidgets.QFileDialog.Options()
-        filename = QtWidgets.QFileDialog.getSaveFileName(self, message, self.home,
+        filename = QtWidgets.QFileDialog.getSaveFileName(self, message, self.current_dir,
                                                          "Images (*.tif *.tiff *.png *.xpm *.jpg)",
                                                          options=options)
         # Store image only if the chooser did not return with a cancel.
-        if filename[0] != "":
-            my_file = Path(filename[0])
+        file_name = filename[0]
+        if file_name != "":
+            my_file = Path(file_name)
+            # Remember the current directory for next file dialog.
+            self.current_dir = str(my_file.parents[0])
             if my_file.is_file():
                 os.remove(str(my_file))
-            cv2.imwrite(filename[0], image)
+            cv2.imwrite(file_name, image)
         else:
             raise Exception("File dialog aborted")
 

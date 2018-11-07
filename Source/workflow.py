@@ -24,7 +24,7 @@ import time
 
 import cv2
 import numpy as np
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 
 
 class Workflow(QtCore.QThread):
@@ -106,6 +106,8 @@ class Workflow(QtCore.QThread):
                 self.gui.image_matches = cv2.drawMatches(self.gui.image_target, keypoints1,
                                                          self.gui.image_reference, keypoints2,
                                                          matches, None)
+                # Load the image into the GUI for display.
+                self.gui.pixmaps[3] = self.create_pixmap(self.gui.image_matches)
 
                 # Extract location of good matches.
                 points1 = np.zeros((len(matches), 2), dtype=np.float32)
@@ -124,21 +126,13 @@ class Workflow(QtCore.QThread):
                                                                        h, (width, height))
                 self.gui.image_rigid_transformed_gray = \
                     cv2.cvtColor(self.gui.image_rigid_transformed, cv2.COLOR_BGR2GRAY)
-
-                # Write aligned image to disk.
-                # outFilename = "Images/2018-03-24_21-01MEZ_Mond_aligned.jpg"
-                # print("Saving aligned image : ", outFilename)
-                # cv2.imwrite(outFilename, self.gui.image_rigid_transformed)
+                self.gui.pixmaps[2] = self.create_pixmap(self.gui.image_rigid_transformed)
 
                 # Signal the GUI that the homography computation is finished.
                 self.set_status_signal.emit(3)
 
                 self.gui.image_dewarped = self.deWarp()
-
-                # Write de-warped image to disk.
-                # outFilename = "Images/2018-03-24_21-01MEZ_Mond_dewarped.jpg"
-                # print("Saving de-warped image : ", outFilename)
-                # cv2.imwrite(outFilename, self.gui.image_dewarped)
+                self.gui.pixmaps[4] = self.create_pixmap(self.gui.image_dewarped)
 
                 # Signal the GUI that the optical flow has been applied to the target image.
                 self.set_status_busy_signal.emit(False)
@@ -148,10 +142,18 @@ class Workflow(QtCore.QThread):
             if self.compute_lrgb_flag:
                 self.compute_lrgb_flag = False
                 self.set_status_busy_signal.emit(True)
-                # Todo: Implement LRGB computation
-                print ("Insert LRGB computation here")
-                self.gui.image_lrgb = self.gui.image_dewarped
-                time.sleep(1.)
+
+                # Convert de-warped color image to HSV color space.
+                image_hsv = cv2.cvtColor(self.gui.image_dewarped, cv2.COLOR_BGR2HSV)
+
+                # Replace V channel with reference grayscale image.
+                image_hsv[:,:,2] = self.gui.image_reference_gray
+
+                # Convert LRGB image back to BGR color space.
+                self.gui.image_lrgb = cv2.cvtColor(image_hsv, cv2.COLOR_HSV2BGR)
+
+                # Load LRGB image as pixmap into GUI viewer
+                self.gui.pixmaps[5] = self.create_pixmap(self.gui.image_lrgb)
                 self.set_status_busy_signal.emit(False)
                 self.set_status_signal.emit(5)
 
@@ -261,3 +263,14 @@ class Workflow(QtCore.QThread):
         res = cv2.remap(img, flow, None, cv2.INTER_LINEAR)
         return res
 
+    def create_pixmap(self, cv_image):
+        """
+        Transform an image in OpenCV color representation (BGR) into a QT pixmap
+
+        :param cv_image: Image array
+        :return: QT QPixmap object
+        """
+
+        return QtGui.QPixmap(
+            QtGui.QImage(cv_image, cv_image.shape[1], cv_image.shape[0], cv_image.shape[1] * 3,
+                         QtGui.QImage.Format_RGB888).rgbSwapped())
