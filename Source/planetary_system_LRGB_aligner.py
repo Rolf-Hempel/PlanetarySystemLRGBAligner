@@ -233,14 +233,28 @@ class LrgbAligner(QtWidgets.QMainWindow):
 
     def show_pixmap(self, pixmap_index):
         """
-        Load a pixmap into the GUI image viewer.
+        Load a pixmap into the GUI image viewer. Adapt the view scale according to the relative
+        sizes of the new and old pixmaps.
 
         :param pixmap_index: Index of the selected pixmap in the list.
         :return: -
         """
 
         if self.pixmaps[pixmap_index] is not None:
+
+            # Get the ratio of old pixmap and viewport sizes.
+            factor_old = self.ImageWindow.fitInView(scale=False)
+
+            # Load the new pixmap.
             self.ImageWindow.setPhoto(self.pixmaps[pixmap_index])
+
+            # Get the ratio of new pixmap and viewport sizes.
+            factor_new = self.ImageWindow.fitInView(scale=False)
+
+            if factor_old is not None:
+                # Scale the view by the relative size factors.
+                factor = factor_new / factor_old
+                self.ImageWindow.scale(factor, factor)
 
     def compute_registration(self):
         """

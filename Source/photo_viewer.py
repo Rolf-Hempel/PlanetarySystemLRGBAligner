@@ -1,4 +1,7 @@
-# Copied from https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview
+# This module was copied from a posting on Stackoverflow:
+#    https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview
+# and adapted to the needs of this project.
+#
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
@@ -25,18 +28,22 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         return not self._empty
 
     def fitInView(self, scale=True):
+        factor = None
         rect = QtCore.QRectF(self._photo.pixmap().rect())
         if not rect.isNull():
             self.setSceneRect(rect)
             if self.hasPhoto():
-                unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
-                self.scale(1 / unity.width(), 1 / unity.height())
+                if scale:
+                    unity = self.transform().mapRect(QtCore.QRectF(0, 0, 1, 1))
+                    self.scale(1 / unity.width(), 1 / unity.height())
                 viewrect = self.viewport().rect()
                 scenerect = self.transform().mapRect(rect)
                 factor = min(viewrect.width() / scenerect.width(),
                              viewrect.height() / scenerect.height())
-                self.scale(factor, factor)
-            self._zoom = 0
+                if scale:
+                    self.scale(factor, factor)
+                    self._zoom = 0
+        return factor
 
     def setPhoto(self, pixmap=None):
         if pixmap and not pixmap.isNull():
