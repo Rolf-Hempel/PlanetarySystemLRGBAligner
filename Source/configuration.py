@@ -36,7 +36,7 @@ class Configuration:
         """
 
         # The version number is displayed on the PSLA main GUI title line.
-        self.version = "Planetary System LRGB Aligner 0.1.0"
+        self.version = "Planetary System LRGB Aligner 0.5.0"
 
         # Set internal parameters which cannot be changed by the user.
         self.wait_for_workflow_initialization = 0.1
@@ -74,26 +74,26 @@ class Configuration:
         # Parameters used for optical flow:
         # Image scale (<1) to build pyramids for each image; pyr_scale=0.5 means a classical
         # pyramid, where each next layer is twice smaller than the previous one.
-        self.pyramid_scale=0.5                # between 0.1 and 0.9
+        self.pyramid_scale = 0.5                # between 0.1 and 0.9
         # Number of pyramid layers including the initial image; levels=1 means that no extra layers
         # are created and only the original images are used.
-        self.levels=1                         # between 1 and 10
+        self.levels = 1                         # between 1 and 10
         # Averaging window size; larger values increase the algorithm robustness to image noise and
         # give more chances for fast motion detection, but yield more blurred motion field.
-        self.winsize=15                       # between 5 and 40
+        self.winsize = 15                       # between 5 and 40
         # Number of iterations the algorithm does at each pyramid level.
-        self.iterations=1                     # between 1 and 10
+        self.iterations = 1                     # between 1 and 10
         # Size of the pixel neighborhood used to find polynomial expansion in each pixel; larger
         # values mean that the image will be approximated with smoother surfaces, yielding more
         # robust algorithm and more blurred motion field, typically poly_n =5 or 7.
-        self.poly_n=5                         # between 3 and 10
+        self.poly_n = 5                         # between 3 and 10
         # Standard deviation of the Gaussian that is used to smooth derivatives used as a basis
         # for the polynomial expansion; for poly_n=5, you can set poly_sigma=1.1, for poly_n=7,
         # a good value would be poly_sigma=1.5.
-        self.poly_sigma=1.1                   # between 1. and 2.
+        self.poly_sigma = 1.1                   # between 1. and 2.
         # Select if the Gaussian winsize * winsize filter should be used instead of a box filter
         # of the same size for optical flow estimation; usually, this option gives a more accurate
         # flow than with a box filter, at the cost of lower speed; normally, winsize for a Gaussian
         # window should be set to a larger value to achieve the same level of robustness.
-        self.use_gaussian_filter = True       # either True or False
+        self.use_gaussian_filter = True         # either True or False
 

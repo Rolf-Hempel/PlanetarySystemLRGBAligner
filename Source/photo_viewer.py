@@ -3,8 +3,9 @@
 # and adapted to the needs of this project.
 #
 
-from PyQt5 import QtCore, QtGui, QtWidgets
 import cv2
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class PhotoViewer(QtWidgets.QGraphicsView):
     photoClicked = QtCore.pyqtSignal(QtCore.QPoint)
@@ -111,7 +112,7 @@ class Window(QtWidgets.QWidget):
         # self.viewer.setPhoto(QtGui.QPixmap('2018-03-24_20-00MEZ_Mond_LRGB.jpg'))
         image = cv2.imread('Images/2018-03-24_20-00MEZ_Mond.jpg')
         qt_image = QtGui.QImage(image, image.shape[1], image.shape[0], image.shape[1] * 3,
-                             QtGui.QImage.Format_RGB888).rgbSwapped()
+                                QtGui.QImage.Format_RGB888).rgbSwapped()
         pixmap = QtGui.QPixmap(qt_image)
         self.viewer.setPhoto(pixmap)
         self.viewer.fitInView()
@@ -120,12 +121,13 @@ class Window(QtWidgets.QWidget):
         self.viewer.toggleDragMode()
 
     def photoClicked(self, pos):
-        if self.viewer.dragMode()  == QtWidgets.QGraphicsView.NoDrag:
+        if self.viewer.dragMode() == QtWidgets.QGraphicsView.NoDrag:
             self.editPixInfo.setText('%d, %d' % (pos.x(), pos.y()))
 
 
 if __name__ == '__main__':
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     window = Window()
     window.setGeometry(500, 300, 800, 600)

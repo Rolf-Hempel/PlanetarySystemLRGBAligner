@@ -147,7 +147,7 @@ class Workflow(QtCore.QThread):
                 image_hsv = cv2.cvtColor(self.gui.image_dewarped, cv2.COLOR_BGR2HSV)
 
                 # Replace V channel with reference grayscale image.
-                image_hsv[:,:,2] = self.gui.image_reference_gray
+                image_hsv[:, :, 2] = self.gui.image_reference_gray
 
                 # Convert LRGB image back to BGR color space.
                 self.gui.image_lrgb = cv2.cvtColor(image_hsv, cv2.COLOR_HSV2BGR)

@@ -21,18 +21,17 @@ along with PSLA.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
-from time import sleep
-import cv2
 from pathlib import Path
-import numpy as np
+from time import sleep
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+import cv2
+from PyQt5 import QtGui, QtWidgets
 
-from main_gui import Ui_MainWindow
 from configuration import Configuration
+from main_gui import Ui_MainWindow
+from photo_viewer import PhotoViewer
 # from configuration_editor import ConfigurationEditor
 from workflow import Workflow
-from photo_viewer import PhotoViewer, Window
 
 
 class LrgbAligner(QtWidgets.QMainWindow):
@@ -174,7 +173,6 @@ class LrgbAligner(QtWidgets.QMainWindow):
         except:
             pass
 
-
     def load_color_image(self):
         """
         Load the color target image from a file. Keep it together with a grayscale version.
@@ -201,15 +199,15 @@ class LrgbAligner(QtWidgets.QMainWindow):
 
         options = QtWidgets.QFileDialog.Options()
         filename = QtWidgets.QFileDialog.getOpenFileName(self, message, self.current_dir,
-                                                  "Images (*.tif *.tiff *.png *.xpm *.jpg)",
-                                                  options=options)
+                                                         "Images (*.tif *.tiff *.png *.xpm *.jpg)",
+                                                         options=options)
         file_name = filename[0]
         if file_name == '':
             raise Exception("File dialog aborted")
         # Remember the current directory for next file dialog.
         self.current_dir = str(Path(file_name).parents[0])
         if color:
-            image_read =  cv2.imread(file_name, cv2.IMREAD_COLOR)
+            image_read = cv2.imread(file_name, cv2.IMREAD_COLOR)
         else:
             image_read = cv2.imread(file_name)
 
@@ -365,7 +363,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.status_list[status] = True
 
         # Reset all downstream status variables to False.
-        self.status_list[status+1 :] = [False] * (len(self.status_list)-status-1)
+        self.status_list[status + 1:] = [False] * (len(self.status_list) - status - 1)
 
         if status != 6:
             # Enable radio buttons which can be used at this point:
@@ -440,6 +438,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.workflow.exiting = True
         sleep(4. * self.configuration.polling_interval)
         sys.exit(0)
+
 
 if __name__ == "__main__":
     # The following four lines are a workaround to make PyInstaller work. Remove them when the
