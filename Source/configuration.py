@@ -56,6 +56,10 @@ class Configuration:
 
         """
 
+        # Parameters to change workflow.
+        self.skip_rigid_transformation = False
+        self.skip_optical_flow = False
+
         # Parameters used for rigid transformation.
         # Number of patches in y direction for feature detection. Features are detected in each
         # patch separately. This leads to a more uniform feature distribution.

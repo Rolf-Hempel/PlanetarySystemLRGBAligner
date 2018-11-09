@@ -39,6 +39,7 @@ class Workflow(QtCore.QThread):
     # Define the list of signals with which this thread communicates with the main gui.
     set_status_signal = QtCore.pyqtSignal(int)
     set_status_busy_signal = QtCore.pyqtSignal(bool)
+    set_error_signal = QtCore.pyqtSignal(str)
 
     def __init__(self, gui, parent=None):
         """
@@ -78,52 +79,72 @@ class Workflow(QtCore.QThread):
                 self.compute_alignment_flag = False
                 self.set_status_busy_signal.emit(True)
 
-                # Detect ORB features and compute descriptors.
-                orb = cv2.ORB_create(self.configuration.max_features)
-                ny = self.configuration.feature_patch_grid_size_y
-                nx = self.configuration.feature_patch_grid_size_x
+                # Check if the rigid transformation step is to be skipped:
+                if not self.configuration.skip_rigid_transformation:
+                    # Detect ORB features and compute descriptors.
+                    orb = cv2.ORB_create(self.configuration.max_features)
+                    ny = self.configuration.feature_patch_grid_size_y
+                    nx = self.configuration.feature_patch_grid_size_x
 
-                keypoints1 = self.getKeypoints(orb, self.gui.image_target_gray, ny, nx)
-                keypoints2 = self.getKeypoints(orb, self.gui.image_reference_gray, ny, nx)
+                    keypoints1 = self.getKeypoints(orb, self.gui.image_target_gray, ny, nx)
+                    keypoints2 = self.getKeypoints(orb, self.gui.image_reference_gray, ny, nx)
 
-                # Compute the descriptors with ORB.
-                keypoints1, descriptors1 = orb.compute(self.gui.image_target_gray, keypoints1)
-                keypoints2, descriptors2 = orb.compute(self.gui.image_reference_gray, keypoints2)
+                    # Compute the descriptors with ORB.
+                    keypoints1, descriptors1 = orb.compute(self.gui.image_target_gray, keypoints1)
+                    keypoints2, descriptors2 = orb.compute(self.gui.image_reference_gray, keypoints2)
 
-                # Match features.
-                matcher = cv2.BFMatcher(self.configuration.feature_matching_norm,
-                                        crossCheck=self.configuration.cross_check)
-                matches = matcher.match(descriptors1, descriptors2, None)
+                    # Match features.
+                    matcher = cv2.BFMatcher(self.configuration.feature_matching_norm,
+                                            crossCheck=self.configuration.cross_check)
+                    matches = matcher.match(descriptors1, descriptors2, None)
 
-                # Sort matches by score
-                matches.sort(key=lambda x: x.distance, reverse=False)
+                    # Sort matches by score
+                    matches.sort(key=lambda x: x.distance, reverse=False)
 
-                # Remove not so good matches.
-                numGoodMatches = int(len(matches) * self.configuration.good_match_fraction)
-                matches = matches[:numGoodMatches]
+                    # Remove not so good matches.
+                    numGoodMatches = int(len(matches) * self.configuration.good_match_fraction)
+                    matches = matches[:numGoodMatches]
 
-                # Draw top matches
-                self.gui.image_matches = cv2.drawMatches(self.gui.image_target, keypoints1,
-                                                         self.gui.image_reference, keypoints2,
-                                                         matches, None)
-                # Load the image into the GUI for display.
-                self.gui.pixmaps[3] = self.create_pixmap(self.gui.image_matches)
+                    # Draw top matches
+                    self.gui.image_matches = cv2.drawMatches(self.gui.image_target, keypoints1,
+                                                             self.gui.image_reference, keypoints2,
+                                                             matches, None)
+                    # Load the image into the GUI for display.
+                    self.gui.pixmaps[3] = self.create_pixmap(self.gui.image_matches)
 
-                # Extract location of good matches.
-                points1 = np.zeros((len(matches), 2), dtype=np.float32)
-                points2 = np.zeros((len(matches), 2), dtype=np.float32)
+                    # Extract location of good matches.
+                    points1 = np.zeros((len(matches), 2), dtype=np.float32)
+                    points2 = np.zeros((len(matches), 2), dtype=np.float32)
 
-                for i, match in enumerate(matches):
-                    points1[i, :] = keypoints1[match.queryIdx].pt
-                    points2[i, :] = keypoints2[match.trainIdx].pt
+                    for i, match in enumerate(matches):
+                        points1[i, :] = keypoints1[match.queryIdx].pt
+                        points2[i, :] = keypoints2[match.trainIdx].pt
 
-                # Find homography.
-                h, mask = cv2.findHomography(points1, points2, self.configuration.match_weighting)
+                    # Find homography.
+                    h, mask = cv2.findHomography(points1, points2, self.configuration.match_weighting)
 
-                # Apply homography on target image.
-                height, width, channels = self.gui.image_reference.shape
-                self.gui.image_rigid_transformed = cv2.warpPerspective(self.gui.image_target,
-                                                                       h, (width, height))
+                    # Apply homography on target image.
+                    height, width, channels = self.gui.image_reference.shape
+                    self.gui.image_rigid_transformed = cv2.warpPerspective(self.gui.image_target,
+                                                                           h, (width, height))
+
+                # Before skipping rigid transformation, test if the target image has the correct
+                # pixel dimensions. If so, just copy the color input file.
+                elif self.gui.image_target.shape[0] == self.gui.image_reference.shape[0] and \
+                     self.gui.image_target.shape[1] == self.gui.image_reference.shape[1]:
+                    self.gui.image_rigid_transformed = self.gui.image_target
+                else:
+                    # Input images have different size, issue error message and reset.
+                    self.set_error_signal.emit("Error: Rigid transformation cannot be skipped if"
+                                               " input images have different size. "
+                                               "Set parameter 'skip rigid transformation' to False,"
+                                               " or use a different color image file.")
+                    # Reset the GUI to the point where only the input files are loaded.
+                    self.set_status_busy_signal.emit(False)
+                    self.set_status_signal.emit(2)
+                    time.sleep(self.gui.configuration.polling_interval)
+                    continue
+
                 self.gui.image_rigid_transformed_gray = \
                     cv2.cvtColor(self.gui.image_rigid_transformed, cv2.COLOR_BGR2GRAY)
                 self.gui.pixmaps[2] = self.create_pixmap(self.gui.image_rigid_transformed)
@@ -131,7 +152,12 @@ class Workflow(QtCore.QThread):
                 # Signal the GUI that the homography computation is finished.
                 self.set_status_signal.emit(3)
 
-                self.gui.image_dewarped = self.deWarp()
+                if self.configuration.skip_optical_flow:
+                    # Since the rigid transformation always produces an image of the correct size,
+                    # this does not have to be checked here again.
+                    self.gui.image_dewarped = self.gui.image_rigid_transformed
+                else:
+                    self.gui.image_dewarped = self.deWarp()
                 self.gui.pixmaps[4] = self.create_pixmap(self.gui.image_dewarped)
 
                 # Signal the GUI that the optical flow has been applied to the target image.

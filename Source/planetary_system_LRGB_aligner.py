@@ -132,10 +132,11 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.workflow = Workflow(self)
         sleep(self.configuration.wait_for_workflow_initialization)
 
-        # The workflow thread sends signals when it is busy and when a task is finished. Connect
-        # those signals with the appropriate GUI activity.
+        # The workflow thread sends signals during computations. Connect those signals with the
+        # appropriate GUI activity.
         self.workflow.set_status_busy_signal.connect(self.set_busy)
         self.workflow.set_status_signal.connect(self.set_status)
+        self.workflow.set_error_signal.connect(self.show_error_message)
 
         # Reset downstream status flags.
         self.set_status(0)
@@ -381,6 +382,12 @@ class LrgbAligner(QtWidgets.QMainWindow):
                 for button in self.control_buttons[self.max_control_button[status]:-1]:
                     button.setEnabled(False)
 
+        if self.configuration.skip_rigid_transformation:
+            self.ui.radioShowColorRigidTransform.setEnabled(False)
+            self.ui.radioShowMatches.setEnabled(False)
+        if self.configuration.skip_optical_flow:
+            self.ui.radioShowColorOptFlow.setEnabled(False)
+
         # Update the status bar.
         self.set_statusbar()
 
@@ -407,10 +414,13 @@ class LrgbAligner(QtWidgets.QMainWindow):
                 status_text += ", B/W reference frame loaded"
 
         # Tell if rigid transformation is done.
-        if self.status_list[self.status_pointer["rigid_transformed"]]:
-            status_text += ", rigid transformation computed"
-        if self.status_list[self.status_pointer["optical_flow_computed"]]:
-            status_text += ", images pixel-wise aligned"
+        if not self.configuration.skip_rigid_transformation:
+            if self.status_list[self.status_pointer["rigid_transformed"]]:
+                status_text += ", rigid transformation computed"
+        # Tell if optical flow has been computed.
+        if not self.configuration.skip_optical_flow:
+            if self.status_list[self.status_pointer["optical_flow_computed"]]:
+                status_text += ", images pixel-wise aligned"
 
         # Tell if the LRGB image is computed.
         if self.status_list[self.status_pointer["lrgb_computed"]]:
@@ -426,6 +436,18 @@ class LrgbAligner(QtWidgets.QMainWindow):
 
         # Write the complete message to the status bar.
         self.ui.statusbar.showMessage(status_text)
+
+    def show_error_message(self, message):
+        """
+        Show an error message. This method is invoked from the workflow thread via the
+        "set_error_signal" signal.
+
+        :param message: Error message to be displayed
+        :return: -
+        """
+
+        error_dialog = QtWidgets.QErrorMessage(self)
+        error_dialog.showMessage(message)
 
     def closeEvent(self, evnt):
         """
