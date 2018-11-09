@@ -30,7 +30,7 @@ from PyQt5 import QtGui, QtWidgets
 from configuration import Configuration
 from main_gui import Ui_MainWindow
 from photo_viewer import PhotoViewer
-# from configuration_editor import ConfigurationEditor
+from configuration_editor import ConfigurationEditor
 from workflow import Workflow
 
 
@@ -150,8 +150,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         :return: -
         """
 
-        # editor = ConfigurationEditor(self.configuration)
-        editor = None
+        editor = ConfigurationEditor(self.configuration)
         editor.exec_()
         if editor.configuration_changed:
             # If parameters have changed, a new alignment has to be computed. If both images are
