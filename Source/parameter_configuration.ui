@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>921</width>
-    <height>629</height>
+    <height>543</height>
    </rect>
   </property>
   <property name="font">
@@ -35,9 +35,6 @@
       <string>TextLabel</string>
      </property>
     </widget>
-   </item>
-   <item row="8" column="2" colspan="3">
-    <widget class="QComboBox" name="srt_combobox"/>
    </item>
    <item row="3" column="7">
     <widget class="QLabel" name="awz_label_parameter">
@@ -91,8 +88,11 @@
      <property name="pageStep">
       <number>2</number>
      </property>
+     <property name="value">
+      <number>1</number>
+     </property>
      <property name="sliderPosition">
-      <number>3</number>
+      <number>1</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -115,7 +115,7 @@
       <number>-1</number>
      </property>
      <property name="maxVisibleItems">
-      <number>1</number>
+      <number>2</number>
      </property>
      <property name="maxCount">
       <number>2</number>
@@ -130,8 +130,11 @@
      <property name="minimum">
       <number>5</number>
      </property>
+     <property name="value">
+      <number>9</number>
+     </property>
      <property name="sliderPosition">
-      <number>10</number>
+      <number>9</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -147,6 +150,9 @@
       <number>10</number>
      </property>
      <property name="pageStep">
+      <number>2</number>
+     </property>
+     <property name="value">
       <number>2</number>
      </property>
      <property name="orientation">
@@ -170,13 +176,6 @@ matrix computation (%)</string>
      </property>
     </widget>
    </item>
-   <item row="8" column="0">
-    <widget class="QLabel" name="srt_label_parameter">
-     <property name="text">
-      <string>Skip rigid transformation</string>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="9">
     <widget class="QSlider" name="sn_slider_value">
      <property name="minimum">
@@ -189,7 +188,7 @@ matrix computation (%)</string>
       <number>2</number>
      </property>
      <property name="value">
-      <number>5</number>
+      <number>6</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -205,6 +204,9 @@ matrix computation (%)</string>
       <number>10</number>
      </property>
      <property name="pageStep">
+      <number>2</number>
+     </property>
+     <property name="value">
       <number>2</number>
      </property>
      <property name="orientation">
@@ -238,7 +240,7 @@ matrix computation (%)</string>
       <number>5</number>
      </property>
      <property name="value">
-      <number>15</number>
+      <number>14</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -272,16 +274,6 @@ matrix computation (%)</string>
      </property>
     </widget>
    </item>
-   <item row="9" column="0">
-    <widget class="QLabel" name="sof_label_parameter">
-     <property name="text">
-      <string>Skip optical Flow</string>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="2" colspan="3">
-    <widget class="QComboBox" name="sof_combobox"/>
-   </item>
    <item row="6" column="7">
     <widget class="QLabel" name="gsd_label_parameter">
      <property name="text">
@@ -302,7 +294,7 @@ for derivative smoothing</string>
       <number>2</number>
      </property>
      <property name="value">
-      <number>11</number>
+      <number>10</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -335,16 +327,6 @@ for derivative smoothing</string>
      </property>
     </widget>
    </item>
-   <item row="7" column="9" colspan="3">
-    <widget class="QComboBox" name="ugf_combobox"/>
-   </item>
-   <item row="7" column="7">
-    <widget class="QLabel" name="ugf_label_parameter">
-     <property name="text">
-      <string>Use Gaussian filter</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="3">
     <spacer name="horizontalSpacer_2">
      <property name="orientation">
@@ -361,13 +343,13 @@ for derivative smoothing</string>
    <item row="1" column="9">
     <widget class="QSlider" name="ps_slider_value">
      <property name="minimum">
-      <number>1</number>
+      <number>10</number>
      </property>
      <property name="maximum">
-      <number>100</number>
+      <number>90</number>
      </property>
      <property name="value">
-      <number>50</number>
+      <number>49</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -437,8 +419,11 @@ pyramids for each image</string>
      <property name="pageStep">
       <number>2</number>
      </property>
+     <property name="value">
+      <number>1</number>
+     </property>
      <property name="sliderPosition">
-      <number>3</number>
+      <number>1</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -512,7 +497,7 @@ pyramids for each image</string>
       <number>200</number>
      </property>
      <property name="value">
-      <number>100</number>
+      <number>97</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -544,6 +529,30 @@ pyramids for each image</string>
     <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="7">
+    <widget class="QCheckBox" name="ugf_checkBox">
+     <property name="text">
+      <string>Use Gaussian filter</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QCheckBox" name="srt_checkBox">
+     <property name="text">
+      <string>Skip rigid transformation</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QCheckBox" name="sof_checkBox">
+     <property name="text">
+      <string>Skip optical Flow</string>
      </property>
     </widget>
    </item>
