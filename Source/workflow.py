@@ -137,7 +137,7 @@ class Workflow(QtCore.QThread):
                     # Input images have different size, issue error message and reset.
                     self.set_error_signal.emit("Error: Rigid transformation cannot be skipped if"
                                                " input images have different size. "
-                                               "Set parameter 'skip rigid transformation' to False,"
+                                               "Uncheck parameter 'skip rigid transformation',"
                                                " or use a different color image file.")
                     # Reset the GUI to the point where only the input files are loaded.
                     self.set_status_busy_signal.emit(False)
