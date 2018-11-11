@@ -123,6 +123,30 @@ class Workflow(QtCore.QThread):
                     # Find homography.
                     h, mask = cv2.findHomography(points1, points2, self.configuration.match_weighting)
 
+                    # Check the result of homography computation for isotropic scaling and angle
+                    # preservation. If deviations are too large, issue a warning.
+                    angle_error, scale_error = self.test_homography(h)
+                    if angle_error > self.configuration.maximum_allowed_angle_deviation:
+                        if scale_error > self.configuration.maximum_allowed_scale_difference:
+                            self.set_error_signal.emit("Warning: The rigid transformation shows a "
+                                "large discrepancy in (x,y) scaling (%5.1f percent) and deviation "
+                                "from orthogonality (%5.1f degrees). It is recommended to try again"
+                                " with different rigid transformation parameters. Otherwise, the "
+                                "optical flow computation may not give satisfactory results."
+                                % (scale_error, angle_error))
+                        else:
+                            self.set_error_signal.emit("Warning: The rigid transformation shows a "
+                                "large deviation from orthogonality (%5.1f degrees). It is "
+                                "recommended to try again with different rigid transformation "
+                                "parameters. Otherwise, the optical flow computation may not give "
+                                "satisfactory results." % (angle_error))
+                    elif scale_error > self.configuration.maximum_allowed_scale_difference:
+                        self.set_error_signal.emit("Warning: The rigid transformation shows a "
+                                "large discrepancy in (x,y) scaling (%5.1f percent). It is "
+                                "recommended to try again with different rigid transformation "
+                                "parameters. Otherwise, the optical flow computation may not give "
+                                "satisfactory results." % (scale_error))
+
                     # Apply homography on target image.
                     height, width, channels = self.gui.image_reference.shape
                     self.gui.image_rigid_transformed = cv2.warpPerspective(self.gui.image_target,
@@ -211,6 +235,45 @@ class Workflow(QtCore.QThread):
                 if kp:
                     keypoints += kp
         return keypoints
+
+    def test_homography(self, homography_matrix):
+        """
+        Check the result of homography computation. The difference between the scaling factors in
+        x and y direction (in percent) and the deviation from orthogonality (in degrees) are
+        computed. If these values exceed certain limits, the homography computation most likely was
+        using appropriate keypoints.
+
+        :param homography_matrix: Homography matrix
+        :return: (scaling factor deviation, orthogonality violation)
+        """
+
+        # Define thre test vectors: One pointing at the origin, and the other two at points on the
+        # x and y axes, respectively, at distance 1.
+        vec_0 = np.array([0., 0., 1.])
+        vec_1x = np.array([0., 1., 1.])
+        vec_1y = np.array([1., 0., 1.])
+
+        # Apply the homography transformation on the test vectors, and subtract the first vector
+        # from the other two.
+        vec_0_hom = homography_matrix.dot(vec_0)
+        vec_1x_hom = homography_matrix.dot(vec_1x)
+        vec_1y_hom = homography_matrix.dot(vec_1y)
+        vec_1x_trans = vec_1x_hom - vec_0_hom
+        vec_1y_trans = vec_1y_hom - vec_0_hom
+
+        # Compute the scaling factor in x and y directions, and the relative difference.
+        scale_x = np.sqrt(vec_1x_trans[0] ** 2 + vec_1x_trans[1] ** 2)
+        scale_y = np.sqrt(vec_1y_trans[0] ** 2 + vec_1y_trans[1] ** 2)
+        scale_error = abs((scale_y - scale_x) / scale_x) * 100.
+
+        # Normalize the transformed vectors to length 1, and compute the deviation of the angle
+        # between them from orthogonality.
+        vec_1x_trans_normalized = vec_1x_trans / scale_x
+        vec_1y_trans_normalized = vec_1y_trans / scale_y
+        angle_error = np.rad2deg(
+            np.arcsin(abs(np.dot(vec_1x_trans_normalized, vec_1y_trans_normalized))))
+        return scale_error, angle_error
+
 
     def getPatch(self, image, ny, nx, j, i):
         """

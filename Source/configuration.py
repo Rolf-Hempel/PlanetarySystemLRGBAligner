@@ -79,6 +79,10 @@ class Configuration:
         # Weighting method used in solving the over-determined homography matrix problem.
         self.match_weighting = cv2.LMEDS      # either cv2.RANSAC for "random sample consensus"
                                               # or cv2.LMEDS for "least median of squares"
+        # Maximum allowed scale difference (%) in homography transformation.
+        self.maximum_allowed_scale_difference = 0.2
+        # Maximum allowed deviation from orthogonality (degrees).
+        self.maximum_allowed_angle_deviation = 0.2
 
         # Parameters used for optical flow:
         # Image scale (<1) to build pyramids for each image; pyr_scale=0.5 means a classical
