@@ -22,24 +22,19 @@
    <property name="verticalSpacing">
     <number>22</number>
    </property>
-   <item row="4" column="4">
-    <widget class="QLabel" name="fdf_label_display">
-     <property name="text">
-      <string>TextLabel</string>
+   <item row="5" column="7">
+    <widget class="QCheckBox" name="ugf_checkBox">
+     <property name="toolTip">
+      <string>Select if the Gaussian filter should be used instead of a box filter of the same size for optical flow estimation;
+the parameter below gives the filter size in both directions; usually, this option gives a more accurate flow
+than with a box filter, at the cost of lower speed; normally, the filter size for a Gaussian window should be set
+to a larger value to achieve the same level of robustness.</string>
      </property>
-    </widget>
-   </item>
-   <item row="5" column="11">
-    <widget class="QLabel" name="sn_label_display">
      <property name="text">
-      <string>TextLabel</string>
+      <string>Use Gaussian filter</string>
      </property>
-    </widget>
-   </item>
-   <item row="3" column="7">
-    <widget class="QLabel" name="awz_label_parameter">
-     <property name="text">
-      <string>Averaging window size</string>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -56,22 +51,50 @@
      </property>
     </spacer>
    </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="wm_label_parameter">
-     <property name="text">
-      <string>Weighting method</string>
+   <item row="3" column="7">
+    <widget class="QLabel" name="awz_label_parameter">
+     <property name="toolTip">
+      <string>Larger values increase the algorithm robustness to image noise and give
+more chances for fast motion detection, but yield more blurred motion field.</string>
      </property>
-    </widget>
-   </item>
-   <item row="4" column="11">
-    <widget class="QLabel" name="ni_label_display">
      <property name="text">
-      <string>TextLabel</string>
+      <string>Averaging window size</string>
      </property>
     </widget>
    </item>
    <item row="2" column="4">
     <widget class="QLabel" name="fpgsx_label_display">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="7">
+    <widget class="QLabel" name="ni_label_parameter">
+     <property name="toolTip">
+      <string>Number of iterations the algorithm does at each pyramid level.</string>
+     </property>
+     <property name="text">
+      <string>Number of iterations</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="11">
+    <widget class="QLabel" name="sn_label_display">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="4">
+    <widget class="QLabel" name="fdf_label_display">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="11">
+    <widget class="QLabel" name="ni_label_display">
      <property name="text">
       <string>TextLabel</string>
      </property>
@@ -99,167 +122,6 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="7">
-    <widget class="QLabel" name="ni_label_parameter">
-     <property name="text">
-      <string>Number of iterations</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="2" colspan="3">
-    <widget class="QComboBox" name="wm_combobox">
-     <property name="currentText">
-      <string/>
-     </property>
-     <property name="currentIndex">
-      <number>-1</number>
-     </property>
-     <property name="maxVisibleItems">
-      <number>2</number>
-     </property>
-     <property name="maxCount">
-      <number>2</number>
-     </property>
-     <property name="minimumContentsLength">
-      <number>0</number>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="2">
-    <widget class="QSlider" name="fdf_slider_value">
-     <property name="minimum">
-      <number>5</number>
-     </property>
-     <property name="value">
-      <number>9</number>
-     </property>
-     <property name="sliderPosition">
-      <number>9</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="9">
-    <widget class="QSlider" name="ni_slider_value">
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>10</number>
-     </property>
-     <property name="pageStep">
-      <number>2</number>
-     </property>
-     <property name="value">
-      <number>2</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="fdf_label_parameter">
-     <property name="text">
-      <string>Fraction of detected features to
-be selected for homography
-matrix computation (%)</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="11">
-    <widget class="QLabel" name="awz_label_display">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="9">
-    <widget class="QSlider" name="sn_slider_value">
-     <property name="minimum">
-      <number>3</number>
-     </property>
-     <property name="maximum">
-      <number>10</number>
-     </property>
-     <property name="pageStep">
-      <number>2</number>
-     </property>
-     <property name="value">
-      <number>6</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="9">
-    <widget class="QSlider" name="npl_slider_value">
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>10</number>
-     </property>
-     <property name="pageStep">
-      <number>2</number>
-     </property>
-     <property name="value">
-      <number>2</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="11">
-    <widget class="QLabel" name="npl_label_display">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="7">
-    <widget class="QLabel" name="sn_label_parameter">
-     <property name="text">
-      <string>Size of neighborhood</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="9">
-    <widget class="QSlider" name="awz_slider_value">
-     <property name="minimum">
-      <number>5</number>
-     </property>
-     <property name="maximum">
-      <number>40</number>
-     </property>
-     <property name="pageStep">
-      <number>5</number>
-     </property>
-     <property name="value">
-      <number>14</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="6">
-    <spacer name="horizontalSpacer_4">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item row="1" column="11">
     <widget class="QLabel" name="ps_label_display">
      <property name="text">
@@ -267,144 +129,66 @@ matrix computation (%)</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="7">
-    <widget class="QLabel" name="npl_label_parameter">
-     <property name="text">
-      <string>Number of pyramid layers</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="7">
+   <item row="7" column="7">
     <widget class="QLabel" name="gsd_label_parameter">
+     <property name="toolTip">
+      <string>Standard deviation of the Gaussian that is used to smooth derivatives used as a basis for
+the polynomial expansion; for a neighborhood size of 5, you can choose 1.1; for a size
+of 7, a good value would be 1.5.</string>
+     </property>
      <property name="text">
       <string>Gaussian standard deviation
 for derivative smoothing</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="9">
-    <widget class="QSlider" name="gsd_slider_value">
-     <property name="minimum">
-      <number>10</number>
-     </property>
-     <property name="maximum">
-      <number>20</number>
-     </property>
-     <property name="pageStep">
-      <number>2</number>
-     </property>
-     <property name="value">
-      <number>10</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="11">
-    <widget class="QLabel" name="gsd_label_display">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0">
+   <item row="8" column="0">
     <widget class="QLabel" name="label_4">
      <property name="font">
       <font>
        <pointsize>12</pointsize>
       </font>
      </property>
+     <property name="toolTip">
+      <string>With these parameters parts of the computing workflow can be skipped.</string>
+     </property>
      <property name="text">
       <string>Workflow Parameters</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="5" rowspan="11">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="9">
-    <widget class="QSlider" name="ps_slider_value">
-     <property name="minimum">
-      <number>10</number>
-     </property>
-     <property name="maximum">
-      <number>90</number>
-     </property>
-     <property name="value">
-      <number>49</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="4">
-    <widget class="QLabel" name="mnf_label_display">
-     <property name="text">
-      <string>TextLabel</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="mnf_label_parameter">
-     <property name="text">
-      <string>Maximal number of features
-to be detected per patch</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="fpgsy_label_parameter">
-     <property name="text">
-      <string>Number of patches in y direction
-for feature detection</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="10">
-    <spacer name="horizontalSpacer_5">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item row="2" column="0">
     <widget class="QLabel" name="fpgsx_label_parameter">
+     <property name="toolTip">
+      <string>Number of patches in x direction for feature detection.
+Features are detected in each patch separately.
+This leads to a more uniform feature distribution.</string>
+     </property>
      <property name="text">
       <string>Number of patches in x direction
 for feature detection</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="7">
-    <widget class="QLabel" name="ps_label_parameter">
+   <item row="0" column="7" colspan="5">
+    <widget class="QLabel" name="label_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Parameters used in the second (fine-tuning) phase. In each pixel the color image
+is warped such that it exactly matches the B/W image.</string>
+     </property>
      <property name="text">
-      <string>Image scale to build
-pyramids for each image</string>
+      <string>Optical Flow Parameters</string>
      </property>
     </widget>
    </item>
@@ -429,6 +213,244 @@ pyramids for each image</string>
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="fpgsy_label_parameter">
+     <property name="toolTip">
+      <string>Feature detection on the entire image often leads to large void areas. As a remedy,
+ the image can be split in a grid of patches, and feature detection is done for each patch separately.
+This leads to a more uniform feature distribution. This parameter specifies the number of patches in y direction.</string>
+     </property>
+     <property name="text">
+      <string>Number of patches in y direction
+for feature detection</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="11">
+    <widget class="QLabel" name="npl_label_display">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="5" rowspan="12">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="6">
+    <spacer name="horizontalSpacer_4">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="7">
+    <widget class="QLabel" name="ps_label_parameter">
+     <property name="toolTip">
+      <string>A value of 0.5 means a classical pyramid, where each
+next layer is half as large as the previous one.</string>
+     </property>
+     <property name="text">
+      <string>Image scale to build
+pyramids for each image</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QSlider" name="mnf_slider_value">
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>200</number>
+     </property>
+     <property name="value">
+      <number>97</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QSlider" name="fdf_slider_value">
+     <property name="minimum">
+      <number>5</number>
+     </property>
+     <property name="value">
+      <number>9</number>
+     </property>
+     <property name="sliderPosition">
+      <number>9</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QLabel" name="fpgsy_label_display">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="9">
+    <widget class="QSlider" name="npl_slider_value">
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>10</number>
+     </property>
+     <property name="pageStep">
+      <number>2</number>
+     </property>
+     <property name="value">
+      <number>2</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="7">
+    <widget class="QLabel" name="npl_label_parameter">
+     <property name="toolTip">
+      <string>A value of 1 means that no extra layers are created and only the original images are used.</string>
+     </property>
+     <property name="text">
+      <string>Number of pyramid layers</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="fdf_label_parameter">
+     <property name="toolTip">
+      <string>Including doubtful matches (large fraction value) can lead to a low transformation quality.
+If the value is too small, it may not be possible to compute the transformation at all.</string>
+     </property>
+     <property name="text">
+      <string>Fraction of detected features to
+be selected for homography
+matrix computation (%)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="9">
+    <widget class="QSlider" name="sn_slider_value">
+     <property name="minimum">
+      <number>3</number>
+     </property>
+     <property name="maximum">
+      <number>10</number>
+     </property>
+     <property name="pageStep">
+      <number>2</number>
+     </property>
+     <property name="value">
+      <number>6</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="7">
+    <widget class="QLabel" name="sn_label_parameter">
+     <property name="toolTip">
+      <string>Size of the pixel neighborhood used to find polynomial expansion in each pixel; larger
+values mean that the image will be approximated with smoother surfaces, yielding more
+robust algorithm and a more blurred motion field, typically values are 5 or 7.</string>
+     </property>
+     <property name="text">
+      <string>Size of neighborhood</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="9">
+    <widget class="QSlider" name="gsd_slider_value">
+     <property name="minimum">
+      <number>10</number>
+     </property>
+     <property name="maximum">
+      <number>20</number>
+     </property>
+     <property name="pageStep">
+      <number>2</number>
+     </property>
+     <property name="value">
+      <number>10</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="9">
+    <widget class="QSlider" name="ps_slider_value">
+     <property name="minimum">
+      <number>10</number>
+     </property>
+     <property name="maximum">
+      <number>90</number>
+     </property>
+     <property name="value">
+      <number>49</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="11">
+    <widget class="QLabel" name="gsd_label_display">
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="9">
+    <widget class="QSlider" name="awz_slider_value">
+     <property name="minimum">
+      <number>5</number>
+     </property>
+     <property name="maximum">
+      <number>40</number>
+     </property>
+     <property name="pageStep">
+      <number>5</number>
+     </property>
+     <property name="value">
+      <number>14</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item row="1" column="8">
     <spacer name="horizontalSpacer_6">
@@ -458,49 +480,108 @@ pyramids for each image</string>
        <bold>false</bold>
       </font>
      </property>
+     <property name="toolTip">
+      <string>Parameters used in the first matching phase. In this phase, the color image
+is rotated, shifted and stretched to match the B/W image.</string>
+     </property>
      <property name="text">
       <string>Rigid Transformation Parameters</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="7" colspan="5">
-    <widget class="QLabel" name="label_2">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+   <item row="1" column="10">
+    <spacer name="horizontalSpacer_5">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="mnf_label_parameter">
+     <property name="toolTip">
+      <string>Maximal number of features to be detected per patch</string>
      </property>
      <property name="text">
-      <string>Optical Flow Parameters</string>
+      <string>Maximal number of features
+to be detected per patch</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="4">
-    <widget class="QLabel" name="fpgsy_label_display">
+   <item row="3" column="11">
+    <widget class="QLabel" name="awz_label_display">
      <property name="text">
       <string>TextLabel</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="2">
-    <widget class="QSlider" name="mnf_slider_value">
-     <property name="minimum">
-      <number>1</number>
+   <item row="3" column="4">
+    <widget class="QLabel" name="mnf_label_display">
+     <property name="text">
+      <string>TextLabel</string>
      </property>
-     <property name="maximum">
-      <number>200</number>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QCheckBox" name="srt_checkBox">
+     <property name="toolTip">
+      <string>If the input color image matches the B/W image very accurately already (and has the same shape), the rigid transformation step can be skipped.
+In this case only the optical flow is computed for fine-tuning.</string>
      </property>
-     <property name="value">
-      <number>97</number>
+     <property name="text">
+      <string>Skip rigid transformation</string>
      </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QCheckBox" name="sof_checkBox">
+     <property name="toolTip">
+      <string>Check this option if only rigid transformation should be applied to the color image.
+Usually this leads to a less accurate match.</string>
+     </property>
+     <property name="text">
+      <string>Skip optical Flow</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="wm_label_parameter">
+     <property name="toolTip">
+      <string>Weighting method used in solving the over-determined homography matrix problem</string>
+     </property>
+     <property name="text">
+      <string>Weighting method</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0" colspan="5">
+    <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2" colspan="3">
+    <widget class="QComboBox" name="wm_combobox">
+     <property name="currentText">
+      <string/>
+     </property>
+     <property name="currentIndex">
+      <number>-1</number>
+     </property>
+     <property name="maxVisibleItems">
+      <number>2</number>
+     </property>
+     <property name="maxCount">
+      <number>2</number>
+     </property>
+     <property name="minimumContentsLength">
+      <number>0</number>
      </property>
     </widget>
    </item>
@@ -511,48 +592,39 @@ pyramids for each image</string>
      </property>
     </widget>
    </item>
-   <item row="10" column="9" colspan="3">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   <item row="4" column="9">
+    <widget class="QSlider" name="ni_slider_value">
+     <property name="minimum">
+      <number>1</number>
      </property>
-    </widget>
-   </item>
-   <item row="9" column="9" colspan="3">
-    <widget class="QPushButton" name="restore_standard_values">
-     <property name="text">
-      <string>Restore standard values</string>
+     <property name="maximum">
+      <number>10</number>
      </property>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="5">
-    <widget class="Line" name="line_2">
+     <property name="pageStep">
+      <number>2</number>
+     </property>
+     <property name="value">
+      <number>2</number>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
-   <item row="7" column="7">
-    <widget class="QCheckBox" name="ugf_checkBox">
-     <property name="text">
-      <string>Use Gaussian filter</string>
+   <item row="9" column="9" colspan="3">
+    <widget class="QPushButton" name="restore_standard_values">
+     <property name="toolTip">
+      <string>Reset parameters to original values. In most cases they should give satisfactory results.</string>
      </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="0">
-    <widget class="QCheckBox" name="srt_checkBox">
      <property name="text">
-      <string>Skip rigid transformation</string>
+      <string>Restore standard values</string>
      </property>
     </widget>
    </item>
-   <item row="9" column="0">
-    <widget class="QCheckBox" name="sof_checkBox">
-     <property name="text">
-      <string>Skip optical Flow</string>
+   <item row="10" column="9" colspan="3">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

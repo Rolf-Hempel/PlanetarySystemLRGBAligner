@@ -61,8 +61,10 @@ class Configuration:
         self.skip_optical_flow = False
 
         # Parameters used for rigid transformation.
-        # Number of patches in y direction for feature detection. Features are detected in each
-        # patch separately. This leads to a more uniform feature distribution.
+        # Feature detection on the entire image often leads to large void areas. As a remedy, the
+        # image can be split in a grid of patches, and feature detection is done for each patch
+        # separately. This leads to a more uniform feature distribution. This parameter specifies
+        # the number of patches in y direction.
         self.feature_patch_grid_size_y = 4    # between 1 and 10
         # Number of patches in x direction for feature detection. Features are detected in each
         # patch separately. This leads to a more uniform feature distribution.
@@ -70,6 +72,9 @@ class Configuration:
         # Maximal number of features to be detected per patch.
         self.max_features = 100               # between 10 and 200
         # Fraction of detected features to be selected for homography matrix computation.
+        # Including doubtful matches (large fraction value) can lead to a low transformation
+        # quality. If the value is too small, it may not be possible to compute the transformation
+        # at all.
         self.good_match_fraction = 0.1        # between 0.05 and 1.
         # Weighting method used in solving the over-determined homography matrix problem.
         self.match_weighting = cv2.LMEDS      # either cv2.RANSAC for "random sample consensus"
@@ -77,7 +82,7 @@ class Configuration:
 
         # Parameters used for optical flow:
         # Image scale (<1) to build pyramids for each image; pyr_scale=0.5 means a classical
-        # pyramid, where each next layer is twice smaller than the previous one.
+        # pyramid, where each next layer is half as large as the previous one.
         self.pyramid_scale = 0.5                # between 0.1 and 0.9
         # Number of pyramid layers including the initial image; levels=1 means that no extra layers
         # are created and only the original images are used.
@@ -89,15 +94,14 @@ class Configuration:
         self.iterations = 1                     # between 1 and 10
         # Size of the pixel neighborhood used to find polynomial expansion in each pixel; larger
         # values mean that the image will be approximated with smoother surfaces, yielding more
-        # robust algorithm and more blurred motion field, typically poly_n =5 or 7.
+        # robust algorithm and a more blurred motion field, typically poly_n =5 or 7.
         self.poly_n = 5                         # between 3 and 10
         # Standard deviation of the Gaussian that is used to smooth derivatives used as a basis
-        # for the polynomial expansion; for poly_n=5, you can set poly_sigma=1.1, for poly_n=7,
-        # a good value would be poly_sigma=1.5.
+        # for the polynomial expansion; for a neighborhood size of 5, you can choose 1.1; for a size
+        # of 7, a good value would be 1.5.
         self.poly_sigma = 1.1                   # between 1. and 2.
         # Select if the Gaussian winsize * winsize filter should be used instead of a box filter
         # of the same size for optical flow estimation; usually, this option gives a more accurate
         # flow than with a box filter, at the cost of lower speed; normally, winsize for a Gaussian
         # window should be set to a larger value to achieve the same level of robustness.
         self.use_gaussian_filter = True         # either True or False
-
