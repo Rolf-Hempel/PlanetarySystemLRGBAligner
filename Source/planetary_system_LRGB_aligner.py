@@ -69,12 +69,12 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.ui.buttonSaveLRGB.clicked.connect(self.save_lrgb_image)
         self.ui.buttonExit.clicked.connect(self.closeEvent)
 
-        self.ui.radioShowBW.clicked.connect(lambda: self.show_pixmap(0))
-        self.ui.radioShowColorOrig.clicked.connect(lambda: self.show_pixmap(1))
-        self.ui.radioShowColorRigidTransform.clicked.connect(lambda: self.show_pixmap(2))
-        self.ui.radioShowMatches.clicked.connect(lambda: self.show_pixmap(3))
-        self.ui.radioShowColorOptFlow.clicked.connect(lambda: self.show_pixmap(4))
-        self.ui.radioShowLRGB.clicked.connect(lambda: self.show_pixmap(5))
+        self.ui.radioShowBW.clicked.connect(lambda: self.show_pixmap(pixmap_index=0))
+        self.ui.radioShowColorOrig.clicked.connect(lambda: self.show_pixmap(pixmap_index=1))
+        self.ui.radioShowColorRigidTransform.clicked.connect(lambda: self.show_pixmap(pixmap_index=2))
+        self.ui.radioShowMatches.clicked.connect(lambda: self.show_pixmap(pixmap_index=3))
+        self.ui.radioShowColorOptFlow.clicked.connect(lambda: self.show_pixmap(pixmap_index=4))
+        self.ui.radioShowLRGB.clicked.connect(lambda: self.show_pixmap(pixmap_index=5))
 
         # Initialize the path to the home directory.
         self.current_dir = str(Path.home())
@@ -87,6 +87,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         self.image_dewarped = None
         self.image_lrgb = None
         self.pixmaps = [None, None, None, None, None, None]
+        self.current_pixmap_index = None
 
         # Initialize status variables
         self.status_list = [False, False, False, False, False, False, False, False]
@@ -229,16 +230,21 @@ class LrgbAligner(QtWidgets.QMainWindow):
             QtGui.QImage(cv_image, cv_image.shape[1], cv_image.shape[0], cv_image.shape[1] * 3,
                          QtGui.QImage.Format_RGB888).rgbSwapped())
 
-    def show_pixmap(self, pixmap_index):
+    def show_pixmap(self, pixmap_index=None):
         """
         Load a pixmap into the GUI image viewer. Adapt the view scale according to the relative
         sizes of the new and old pixmaps.
 
-        :param pixmap_index: Index of the selected pixmap in the list.
+        :param pixmap_index: Index of the selected pixmap in the list. If not selected, the
+                             current index is taken.
         :return: -
         """
 
+        if pixmap_index is None:
+            pixmap_index = self.current_pixmap_index
+
         if self.pixmaps[pixmap_index] is not None:
+            self.current_pixmap_index = pixmap_index
 
             # Get the ratio of old pixmap and viewport sizes.
             factor_old = self.ImageWindow.fitInView(scale=False)
@@ -386,6 +392,10 @@ class LrgbAligner(QtWidgets.QMainWindow):
             self.ui.radioShowMatches.setEnabled(False)
         if self.configuration.skip_optical_flow:
             self.ui.radioShowColorOptFlow.setEnabled(False)
+
+        # Refresh the image viewer.
+        if self.current_pixmap_index is not None:
+            self.show_pixmap()
 
         # Update the status bar.
         self.set_statusbar()
