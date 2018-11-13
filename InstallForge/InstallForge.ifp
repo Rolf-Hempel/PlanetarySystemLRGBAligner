@@ -57,7 +57,7 @@ Time = 2
 PlaySound = 0
 Allow = 0
 [Build]
-File = D:\SW-Development\Python\PlanetarySystemLRGBAligner\Windows_Installer\PlanetarySystemLRGBAligner_V0.5.0_Installer.exe
+File = D:\SW-Development\Python\PlanetarySystemLRGBAligner\Windows_Installer\PlanetarySystemLRGBAligner_V0.5.0_Windows-Installer.exe
 [Updater]
 Allow = 0
 1 = <appname>
