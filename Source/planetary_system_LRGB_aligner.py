@@ -26,6 +26,7 @@ from time import sleep
 
 import cv2
 from PyQt5 import QtGui, QtWidgets
+import numpy as np
 
 from configuration import Configuration
 from main_gui import Ui_MainWindow
@@ -81,9 +82,9 @@ class LrgbAligner(QtWidgets.QMainWindow):
 
         # Initialize instance variables.
         self.image_reference = None
-        self.image_reference_gray = None
+        self.image_reference_8bit_gray = None
         self.image_target = None
-        self.image_target_gray = None
+        self.image_target_8bit_gray = None
         self.image_dewarped = None
         self.image_lrgb = None
         self.pixmaps = [None, None, None, None, None, None]
@@ -167,8 +168,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
         """
 
         try:
-            self.image_reference = self.load_image("Load B/W reference image", 0)
-            self.image_reference_gray = cv2.cvtColor(self.image_reference, cv2.COLOR_BGR2GRAY)
+            self.image_reference, self.image_reference_8bit_gray, self.image_reference_8bit_color = \
+                self.load_image("Load B/W reference image", 0, color=False)
             self.ui.radioShowBW.setChecked(True)
             self.set_status(1)
         except:
@@ -182,8 +183,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
         """
 
         try:
-            self.image_target = self.load_image("Load color image to be registered", 1)
-            self.image_target_gray = cv2.cvtColor(self.image_target, cv2.COLOR_BGR2GRAY)
+            self.image_target, self.image_target_8bit_gray, self.image_target_8bit_color = \
+                self.load_image("Load color image to be registered", 1, color=True)
             self.ui.radioShowColorOrig.setChecked(True)
             self.set_status(2)
         except:
@@ -194,8 +195,11 @@ class LrgbAligner(QtWidgets.QMainWindow):
         Read an image from a file. Convert it to color mode if optional parameter is set to True.
 
         :param pixmap_index: Index into the list of pixel maps used to show images in GUI.
-        :param color: If True, convert image to color mode.
-        :return: Numpy array with image data
+        :param color: If True, convert image to color mode. If False, convert it to grayscale.
+        :return: 3-tupel with numpy arrays with image data in three versions:
+            - Original depth and color / grayscale
+            - 8bit grayscale
+            - 8bit color
         """
 
         options = QtWidgets.QFileDialog.Options()
@@ -208,15 +212,26 @@ class LrgbAligner(QtWidgets.QMainWindow):
         # Remember the current directory for next file dialog.
         self.current_dir = str(Path(file_name).parents[0])
         if color:
-            image_read = cv2.imread(file_name, cv2.IMREAD_COLOR)
+            image_read = cv2.imread(file_name, cv2.IMREAD_UNCHANGED)
+            if image_read.dtype == np.uint16:
+                print ("converting 16bit color to 8bit")
+                image_read_8bit_color = (image_read/256).astype('uint8')
+            else:
+                image_read_8bit_color = image_read
+            image_read_8bit_gray = cv2.cvtColor(image_read_8bit_color, cv2.COLOR_BGR2GRAY)
         else:
-            image_read = cv2.imread(file_name)
+            image_read = cv2.imread(file_name, cv2.IMREAD_ANYDEPTH)
+            # If color image, convert to grayscale.
+            if len(image_read.shape) == 3:
+                image_read = cv2.cv2.cvtColor(image_read, cv2.COLOR_BayerRG2GRAY)
+            image_read_8bit_gray = cv2.convertScaleAbs(image_read, alpha=(255.0 / 65535.0))
+            image_read_8bit_color = cv2.cvtColor(image_read_8bit_gray, cv2.COLOR_GRAY2BGR)
 
         # Convert image into QT pixmel map, store it in list and load it into GUI viewer.
-        self.pixmaps[pixmap_index] = self.create_pixmap(image_read)
+        self.pixmaps[pixmap_index] = self.create_pixmap(image_read_8bit_color)
         self.ImageWindow.setPhoto(self.pixmaps[pixmap_index])
         self.ImageWindow.fitInView()
-        return image_read
+        return image_read, image_read_8bit_gray, image_read_8bit_color
 
     def create_pixmap(self, cv_image):
         """

@@ -86,12 +86,12 @@ class Workflow(QtCore.QThread):
                     ny = self.configuration.feature_patch_grid_size_y
                     nx = self.configuration.feature_patch_grid_size_x
 
-                    keypoints1 = self.getKeypoints(orb, self.gui.image_target_gray, ny, nx)
-                    keypoints2 = self.getKeypoints(orb, self.gui.image_reference_gray, ny, nx)
+                    keypoints1 = self.getKeypoints(orb, self.gui.image_target_8bit_gray, ny, nx)
+                    keypoints2 = self.getKeypoints(orb, self.gui.image_reference_8bit_gray, ny, nx)
 
                     # Compute the descriptors with ORB.
-                    keypoints1, descriptors1 = orb.compute(self.gui.image_target_gray, keypoints1)
-                    keypoints2, descriptors2 = orb.compute(self.gui.image_reference_gray, keypoints2)
+                    keypoints1, descriptors1 = orb.compute(self.gui.image_target_8bit_gray, keypoints1)
+                    keypoints2, descriptors2 = orb.compute(self.gui.image_reference_8bit_gray, keypoints2)
 
                     # Match features.
                     matcher = cv2.BFMatcher(self.configuration.feature_matching_norm,
@@ -106,8 +106,8 @@ class Workflow(QtCore.QThread):
                     matches = matches[:numGoodMatches]
 
                     # Draw top matches
-                    self.gui.image_matches = cv2.drawMatches(self.gui.image_target, keypoints1,
-                                                             self.gui.image_reference, keypoints2,
+                    self.gui.image_matches = cv2.drawMatches(self.gui.image_target_8bit_color, keypoints1,
+                                                             self.gui.image_reference_8bit_gray, keypoints2,
                                                              matches, None)
                     # Load the image into the GUI for display.
                     self.gui.pixmaps[3] = self.create_pixmap(self.gui.image_matches)
@@ -148,7 +148,7 @@ class Workflow(QtCore.QThread):
                                 "satisfactory results." % (scale_error))
 
                     # Apply homography on target image.
-                    height, width, channels = self.gui.image_reference.shape
+                    height, width = self.gui.image_reference_8bit_gray.shape
                     self.gui.image_rigid_transformed = cv2.warpPerspective(self.gui.image_target,
                                                                            h, (width, height))
 
@@ -169,9 +169,14 @@ class Workflow(QtCore.QThread):
                     time.sleep(self.gui.configuration.polling_interval)
                     continue
 
-                self.gui.image_rigid_transformed_gray = \
-                    cv2.cvtColor(self.gui.image_rigid_transformed, cv2.COLOR_BGR2GRAY)
-                self.gui.pixmaps[2] = self.create_pixmap(self.gui.image_rigid_transformed)
+                if self.gui.image_rigid_transformed.dtype == np.uint16:
+                    self.gui.image_rigid_transformed_8bit = \
+                        (self.gui.image_rigid_transformed/256).astype('uint8')
+                else:
+                    self.gui.image_rigid_transformed_8bit = self.gui.image_rigid_transformed
+                self.gui.image_rigid_transformed_8bit_gray = \
+                    cv2.cvtColor(self.gui.image_rigid_transformed_8bit, cv2.COLOR_BGR2GRAY)
+                self.gui.pixmaps[2] = self.create_pixmap(self.gui.image_rigid_transformed_8bit)
 
                 # Signal the GUI that the homography computation is finished.
                 self.set_status_signal.emit(3)
@@ -190,20 +195,32 @@ class Workflow(QtCore.QThread):
 
             # Compute an LRGB composite from the B/W image and the pixelwise aligned color image.
             if self.compute_lrgb_flag:
+                print ("Computing LRGB")
                 self.compute_lrgb_flag = False
                 self.set_status_busy_signal.emit(True)
 
                 # Convert de-warped color image to HSV color space.
                 image_hsv = cv2.cvtColor(self.gui.image_dewarped, cv2.COLOR_BGR2HSV)
+                if image_hsv.dtype == np.uint8:
+                    print ("image_hsv depth: 8bit")
+                elif image_hsv.dtype == np.uint16:
+                    print("image_hsv depth: 16bit")
+                else:
+                    print("image_hsv depth: invalid value "+ str(image_hsv.dtype))
 
                 # Replace V channel with reference grayscale image.
-                image_hsv[:, :, 2] = self.gui.image_reference_gray
+                if image_hsv.dtype == self.gui.image_reference.dtype:
+                    image_hsv[:, :, 2] = self.gui.image_reference
+                elif image_hsv.dtype == np.uint8:
+                    image_hsv[:, :, 2] = self.gui.image_reference_8bit_gray
+                else:
+                    image_hsv[:, :, 2] = self.gui.image_reference_8bit_gray * 257
 
                 # Convert LRGB image back to BGR color space.
                 self.gui.image_lrgb = cv2.cvtColor(image_hsv, cv2.COLOR_HSV2BGR)
 
                 # Load LRGB image as pixmap into GUI viewer
-                self.gui.pixmaps[5] = self.create_pixmap(self.gui.image_lrgb)
+                # self.gui.pixmaps[5] = self.create_pixmap(self.gui.image_lrgb)
                 self.set_status_busy_signal.emit(False)
                 self.set_status_signal.emit(5)
 
@@ -310,8 +327,8 @@ class Workflow(QtCore.QThread):
 
         # If Gaussian filter is specified, set the flag accordingly. Compute the flow field.
         if self.configuration.use_gaussian_filter:
-            flow = cv2.calcOpticalFlowFarneback(self.gui.image_reference_gray,
-                                                self.gui.image_rigid_transformed_gray, flow=None,
+            flow = cv2.calcOpticalFlowFarneback(self.gui.image_reference_8bit_gray,
+                                                self.gui.image_rigid_transformed_8bit_gray, flow=None,
                                                 pyr_scale=self.configuration.pyramid_scale,
                                                 levels=self.configuration.levels,
                                                 winsize=self.configuration.winsize,
@@ -320,8 +337,8 @@ class Workflow(QtCore.QThread):
                                                 poly_sigma=self.configuration.poly_sigma,
                                                 flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN)
         else:
-            flow = cv2.calcOpticalFlowFarneback(self.gui.image_reference_gray,
-                                                self.gui.image_rigid_transformed_gray, flow=None,
+            flow = cv2.calcOpticalFlowFarneback(self.gui.image_reference_8bit_gray,
+                                                self.gui.image_rigid_transformed_8bit_gray, flow=None,
                                                 pyr_scale=self.configuration.pyramid_scale,
                                                 levels=self.configuration.levels,
                                                 winsize=self.configuration.winsize,
@@ -354,12 +371,17 @@ class Workflow(QtCore.QThread):
 
     def create_pixmap(self, cv_image):
         """
-        Transform an image in OpenCV color representation (BGR) into a QT pixmap
+        Transform an image in OpenCV color representation (BGR) into a QT pixmap. If the image is
+        16bit deep, first convert it to 8bit.
 
         :param cv_image: Image array
         :return: QT QPixmap object
         """
 
+        if cv_image.dtype == np.uint16:
+            image_8b = (cv_image/256).astype('uint8')
+        else:
+            image_8b = cv_image
         return QtGui.QPixmap(
-            QtGui.QImage(cv_image, cv_image.shape[1], cv_image.shape[0], cv_image.shape[1] * 3,
+            QtGui.QImage(image_8b, image_8b.shape[1], image_8b.shape[0], image_8b.shape[1] * 3,
                          QtGui.QImage.Format_RGB888).rgbSwapped())
