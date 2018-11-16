@@ -171,6 +171,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
             self.image_reference, self.image_reference_8bit_gray, self.image_reference_8bit_color = \
                 self.load_image("Load B/W reference image", 0, color=False)
             self.ui.radioShowBW.setChecked(True)
+            self.current_pixmap_index = 0
             self.set_status(1)
         except:
             pass
@@ -186,6 +187,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
             self.image_target, self.image_target_8bit_gray, self.image_target_8bit_color = \
                 self.load_image("Load color image to be registered", 1, color=True)
             self.ui.radioShowColorOrig.setChecked(True)
+            self.current_pixmap_index = 1
             self.set_status(2)
         except:
             pass
@@ -204,7 +206,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
 
         options = QtWidgets.QFileDialog.Options()
         filename = QtWidgets.QFileDialog.getOpenFileName(self, message, self.current_dir,
-                                                         "Images (*.tif *.tiff *.png *.xpm *.jpg)",
+                                                         "Images (*.tif *.tiff *.png *.jpg)",
                                                          options=options)
         file_name = filename[0]
         if file_name == '':
@@ -223,7 +225,10 @@ class LrgbAligner(QtWidgets.QMainWindow):
             # If color image, convert to grayscale.
             if len(image_read.shape) == 3:
                 image_read = cv2.cv2.cvtColor(image_read, cv2.COLOR_BayerRG2GRAY)
-            image_read_8bit_gray = cv2.convertScaleAbs(image_read, alpha=(255.0 / 65535.0))
+            if image_read.dtype == np.uint16:
+                image_read_8bit_gray = cv2.convertScaleAbs(image_read, alpha=(255.0 / 65535.0))
+            else:
+                image_read_8bit_gray = image_read
             image_read_8bit_color = cv2.cvtColor(image_read_8bit_gray, cv2.COLOR_GRAY2BGR)
 
         # Convert image into QT pixmel map, store it in list and load it into GUI viewer.
@@ -337,7 +342,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
 
         options = QtWidgets.QFileDialog.Options()
         filename = QtWidgets.QFileDialog.getSaveFileName(self, message, self.current_dir,
-                                                         "Images (*.tif *.tiff *.png *.xpm *.jpg)",
+                                                         "Images (*.tif *.tiff *.png *.jpg)",
                                                          options=options)
         # Store image only if the chooser did not return with a cancel.
         file_name = filename[0]
