@@ -214,7 +214,6 @@ class LrgbAligner(QtWidgets.QMainWindow):
         if color:
             image_read = cv2.imread(file_name, cv2.IMREAD_UNCHANGED)
             if image_read.dtype == np.uint16:
-                print ("converting 16bit color to 8bit")
                 image_read_8bit_color = (image_read/256).astype('uint8')
             else:
                 image_read_8bit_color = image_read
@@ -348,7 +347,14 @@ class LrgbAligner(QtWidgets.QMainWindow):
             self.current_dir = str(my_file.parents[0])
             if my_file.is_file():
                 os.remove(str(my_file))
-            cv2.imwrite(file_name, image)
+            if my_file.suffix == '.tif' or my_file.suffix == '.tiff':
+                cv2.imwrite(file_name, image)
+            elif image.dtype == np.uint16:
+                image_8bit = (image / 256).astype('uint8')
+                cv2.imwrite(file_name, image_8bit)
+            else:
+                cv2.imwrite(file_name, image)
+
         else:
             raise Exception("File dialog aborted")
 

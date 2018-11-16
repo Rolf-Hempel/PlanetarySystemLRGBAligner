@@ -195,32 +195,14 @@ class Workflow(QtCore.QThread):
 
             # Compute an LRGB composite from the B/W image and the pixelwise aligned color image.
             if self.compute_lrgb_flag:
-                print ("Computing LRGB")
                 self.compute_lrgb_flag = False
                 self.set_status_busy_signal.emit(True)
 
-                # Convert de-warped color image to HSV color space.
-                image_hsv = cv2.cvtColor(self.gui.image_dewarped, cv2.COLOR_BGR2HSV)
-                if image_hsv.dtype == np.uint8:
-                    print ("image_hsv depth: 8bit")
-                elif image_hsv.dtype == np.uint16:
-                    print("image_hsv depth: 16bit")
-                else:
-                    print("image_hsv depth: invalid value "+ str(image_hsv.dtype))
-
-                # Replace V channel with reference grayscale image.
-                if image_hsv.dtype == self.gui.image_reference.dtype:
-                    image_hsv[:, :, 2] = self.gui.image_reference
-                elif image_hsv.dtype == np.uint8:
-                    image_hsv[:, :, 2] = self.gui.image_reference_8bit_gray
-                else:
-                    image_hsv[:, :, 2] = self.gui.image_reference_8bit_gray * 257
-
-                # Convert LRGB image back to BGR color space.
-                self.gui.image_lrgb = cv2.cvtColor(image_hsv, cv2.COLOR_HSV2BGR)
+                self.gui.image_lrgb, self.gui.image_lrgb_8bit = self.create_lrgb_composite(
+                    self.gui.image_dewarped, self.gui.image_reference)
 
                 # Load LRGB image as pixmap into GUI viewer
-                # self.gui.pixmaps[5] = self.create_pixmap(self.gui.image_lrgb)
+                self.gui.pixmaps[5] = self.create_pixmap(self.gui.image_lrgb_8bit)
                 self.set_status_busy_signal.emit(False)
                 self.set_status_signal.emit(5)
 
@@ -385,3 +367,45 @@ class Workflow(QtCore.QThread):
         return QtGui.QPixmap(
             QtGui.QImage(image_8b, image_8b.shape[1], image_8b.shape[0], image_8b.shape[1] * 3,
                          QtGui.QImage.Format_RGB888).rgbSwapped())
+
+    def create_lrgb_composite(self, image_color, image_bw):
+        """
+        Combine a color image and a B/W image into an LRGB composite.
+
+        :param image_color: Three channel color image (8 or 16 bit per channel)
+        :param image_bw: B/W image (8 or 16 bit per channel)
+        :return: Two versions of the LRGB composite:
+                - The first with the same color depth as the input color image
+                - The second with 8bit color depth
+        """
+
+        # Compute the luminance channel of the input color image as the arithmetic mean of BGR.
+        image_color_l = np.average(image_color, axis=2)
+
+        # Create a "scale" field which for each pixel contains the change factor to apply to the
+        # three pixels of the color image. Avoid divide by zero!
+        if image_color.dtype == image_bw.dtype:
+            scale = image_bw / (image_color_l + 1.e-7)
+        elif image_color.dtype == np.uint8 and image_bw.dtype == np.uint16:
+            scale = image_bw / (image_color_l + 1.e-7) / 256.
+        elif image_color.dtype == np.uint16 and image_bw.dtype == np.uint8:
+            scale = image_bw / (image_color_l + 1.e-7) * 256.
+
+        # Create the LRGB image with the same color depth as the input color image.
+        image_lrgb = np.array(image_color, dtype=image_color.dtype)
+
+        # Apply clipping to avoid overflows in very bright pixels.
+        if image_color.dtype == np.uint16:
+            clip_value = 65535
+        else:
+            clip_value = 255
+        image_lrgb[:, :, 0] = np.clip(image_color[:, :, 0] * scale, 0, clip_value)
+        image_lrgb[:, :, 1] = np.clip(image_color[:, :, 1] * scale, 0, clip_value)
+        image_lrgb[:, :, 2] = np.clip(image_color[:, :, 2] * scale, 0, clip_value)
+
+        # Reduce 16bit color depth to 8bit for the second return array, if necessary.
+        if image_lrgb.dtype == np.uint16:
+            image_lrgb_8bit = (image_lrgb / 256).astype('uint8')
+        else:
+            image_lrgb_8bit = image_lrgb
+        return image_lrgb, image_lrgb_8bit
