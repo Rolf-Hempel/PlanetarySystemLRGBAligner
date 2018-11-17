@@ -20,9 +20,11 @@ along with PSLA.  If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-from PyQt5 import QtWidgets, QtCore
 import cv2
+from PyQt5 import QtWidgets, QtCore
+
 from parameter_configuration import Ui_ConfigurationDialog
+
 
 class ConfigurationEditor(QtWidgets.QDialog, Ui_ConfigurationDialog):
     """
@@ -70,13 +72,14 @@ class ConfigurationEditor(QtWidgets.QDialog, Ui_ConfigurationDialog):
         self.fpgsx_label_display.setText(str(self.configuration.feature_patch_grid_size_x))
         self.mnf_slider_value.setValue(self.configuration.max_features)
         self.mnf_label_display.setText(str(self.configuration.max_features))
-        self.fdf_slider_value.setValue(int(self.configuration.good_match_fraction*100.+0.1))
-        self.fdf_label_display.setText(str(int(self.configuration.good_match_fraction*100.+0.1)))
+        self.fdf_slider_value.setValue(int(self.configuration.good_match_fraction * 100. + 0.1))
+        self.fdf_label_display.setText(
+            str(int(self.configuration.good_match_fraction * 100. + 0.1)))
         if self.configuration.match_weighting == cv2.LMEDS:
             self.wm_combobox.setCurrentIndex(1)
         else:
             self.wm_combobox.setCurrentIndex(0)
-        self.ps_slider_value.setValue(int(self.configuration.pyramid_scale*100+0.1))
+        self.ps_slider_value.setValue(int(self.configuration.pyramid_scale * 100 + 0.1))
         self.ps_label_display.setText(str(self.configuration.pyramid_scale))
         self.npl_slider_value.setValue(self.configuration.levels)
         self.npl_label_display.setText(str(self.configuration.levels))
@@ -86,7 +89,7 @@ class ConfigurationEditor(QtWidgets.QDialog, Ui_ConfigurationDialog):
         self.ni_label_display.setText(str(self.configuration.iterations))
         self.sn_slider_value.setValue(self.configuration.poly_n)
         self.sn_label_display.setText(str(self.configuration.poly_n))
-        self.gsd_slider_value.setValue(int(self.configuration.poly_sigma*10+0.1))
+        self.gsd_slider_value.setValue(int(self.configuration.poly_sigma * 10 + 0.1))
         self.gsd_label_display.setText(str(self.configuration.poly_sigma))
         self.ugf_checkBox.setChecked(self.configuration.use_gaussian_filter)
         self.srt_checkBox.setChecked(self.configuration.skip_rigid_transformation)
@@ -146,7 +149,7 @@ class ConfigurationEditor(QtWidgets.QDialog, Ui_ConfigurationDialog):
         :param value: Changed input value
         :return: -
         """
-        self.good_match_fraction_new = float(value)/100.
+        self.good_match_fraction_new = float(value) / 100.
 
     def wm_changed(self, value):
         """
@@ -169,7 +172,7 @@ class ConfigurationEditor(QtWidgets.QDialog, Ui_ConfigurationDialog):
         :param value: Changed input value
         :return: -
         """
-        self.pyramid_scale_new = float(value)/100.
+        self.pyramid_scale_new = float(value) / 100.
         self.ps_label_display.setText(str(self.pyramid_scale_new))
 
     def npl_changed(self, value):
@@ -220,7 +223,7 @@ class ConfigurationEditor(QtWidgets.QDialog, Ui_ConfigurationDialog):
         :param value: Changed input value
         :return: -
         """
-        self.poly_sigma_new = float(value)/10.
+        self.poly_sigma_new = float(value) / 10.
         self.gsd_label_display.setText(str(self.poly_sigma_new))
 
     def ugf_changed(self, state):

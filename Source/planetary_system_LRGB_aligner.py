@@ -25,13 +25,13 @@ from pathlib import Path
 from time import sleep
 
 import cv2
-from PyQt5 import QtGui, QtWidgets
 import numpy as np
+from PyQt5 import QtGui, QtWidgets
 
 from configuration import Configuration
+from configuration_editor import ConfigurationEditor
 from main_gui import Ui_MainWindow
 from photo_viewer import PhotoViewer
-from configuration_editor import ConfigurationEditor
 from workflow import Workflow
 
 
@@ -72,7 +72,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
 
         self.ui.radioShowBW.clicked.connect(lambda: self.show_pixmap(pixmap_index=0))
         self.ui.radioShowColorOrig.clicked.connect(lambda: self.show_pixmap(pixmap_index=1))
-        self.ui.radioShowColorRigidTransform.clicked.connect(lambda: self.show_pixmap(pixmap_index=2))
+        self.ui.radioShowColorRigidTransform.clicked.connect(
+            lambda: self.show_pixmap(pixmap_index=2))
         self.ui.radioShowMatches.clicked.connect(lambda: self.show_pixmap(pixmap_index=3))
         self.ui.radioShowColorOptFlow.clicked.connect(lambda: self.show_pixmap(pixmap_index=4))
         self.ui.radioShowLRGB.clicked.connect(lambda: self.show_pixmap(pixmap_index=5))
@@ -216,7 +217,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         if color:
             image_read = cv2.imread(file_name, cv2.IMREAD_UNCHANGED)
             if image_read.dtype == np.uint16:
-                image_read_8bit_color = (image_read/256).astype('uint8')
+                image_read_8bit_color = (image_read / 256).astype('uint8')
             else:
                 image_read_8bit_color = image_read
             image_read_8bit_gray = cv2.cvtColor(image_read_8bit_color, cv2.COLOR_BGR2GRAY)

@@ -90,8 +90,10 @@ class Workflow(QtCore.QThread):
                     keypoints2 = self.getKeypoints(orb, self.gui.image_reference_8bit_gray, ny, nx)
 
                     # Compute the descriptors with ORB.
-                    keypoints1, descriptors1 = orb.compute(self.gui.image_target_8bit_gray, keypoints1)
-                    keypoints2, descriptors2 = orb.compute(self.gui.image_reference_8bit_gray, keypoints2)
+                    keypoints1, descriptors1 = orb.compute(self.gui.image_target_8bit_gray,
+                                                           keypoints1)
+                    keypoints2, descriptors2 = orb.compute(self.gui.image_reference_8bit_gray,
+                                                           keypoints2)
 
                     # Match features.
                     matcher = cv2.BFMatcher(self.configuration.feature_matching_norm,
@@ -106,9 +108,10 @@ class Workflow(QtCore.QThread):
                     matches = matches[:numGoodMatches]
 
                     # Draw top matches
-                    self.gui.image_matches = cv2.drawMatches(self.gui.image_target_8bit_color, keypoints1,
-                                                             self.gui.image_reference_8bit_gray, keypoints2,
-                                                             matches, None)
+                    self.gui.image_matches = cv2.drawMatches(self.gui.image_target_8bit_color,
+                                                             keypoints1,
+                                                             self.gui.image_reference_8bit_gray,
+                                                             keypoints2, matches, None)
                     # Load the image into the GUI for display.
                     self.gui.pixmaps[3] = self.create_pixmap(self.gui.image_matches)
 
@@ -121,7 +124,8 @@ class Workflow(QtCore.QThread):
                         points2[i, :] = keypoints2[match.trainIdx].pt
 
                     # Find homography.
-                    h, mask = cv2.findHomography(points1, points2, self.configuration.match_weighting)
+                    h, mask = cv2.findHomography(points1, points2,
+                                                 self.configuration.match_weighting)
 
                     # Check the result of homography computation for isotropic scaling and angle
                     # preservation. If deviations are too large, issue a warning.
@@ -129,23 +133,23 @@ class Workflow(QtCore.QThread):
                     if angle_error > self.configuration.maximum_allowed_angle_deviation:
                         if scale_error > self.configuration.maximum_allowed_scale_difference:
                             self.set_error_signal.emit("Warning: The rigid transformation shows a "
-                                "large discrepancy in (x,y) scaling (%5.1f percent) and deviation "
-                                "from orthogonality (%5.1f degrees). It is recommended to try again"
-                                " with different rigid transformation parameters. Otherwise, the "
-                                "optical flow computation may not give satisfactory results."
-                                % (scale_error, angle_error))
+                               "large discrepancy in (x,y) scaling (%5.1f percent) and deviation "
+                               "from orthogonality (%5.1f degrees). It is recommended to try again"
+                               " with different rigid transformation parameters. Otherwise, the "
+                               "optical flow computation may not give satisfactory results."
+                               % (scale_error, angle_error))
                         else:
                             self.set_error_signal.emit("Warning: The rigid transformation shows a "
-                                "large deviation from orthogonality (%5.1f degrees). It is "
-                                "recommended to try again with different rigid transformation "
-                                "parameters. Otherwise, the optical flow computation may not give "
-                                "satisfactory results." % (angle_error))
+                               "large deviation from orthogonality (%5.1f degrees). It is "
+                               "recommended to try again with different rigid transformation "
+                               "parameters. Otherwise, the optical flow computation may not give "
+                               "satisfactory results." % (angle_error))
                     elif scale_error > self.configuration.maximum_allowed_scale_difference:
                         self.set_error_signal.emit("Warning: The rigid transformation shows a "
-                                "large discrepancy in (x,y) scaling (%5.1f percent). It is "
-                                "recommended to try again with different rigid transformation "
-                                "parameters. Otherwise, the optical flow computation may not give "
-                                "satisfactory results." % (scale_error))
+                               "large discrepancy in (x,y) scaling (%5.1f percent). It is "
+                               "recommended to try again with different rigid transformation "
+                               "parameters. Otherwise, the optical flow computation may not give "
+                               "satisfactory results." % (scale_error))
 
                     # Apply homography on target image.
                     height, width = self.gui.image_reference_8bit_gray.shape
@@ -155,7 +159,7 @@ class Workflow(QtCore.QThread):
                 # Before skipping rigid transformation, test if the target image has the correct
                 # pixel dimensions. If so, just copy the color input file.
                 elif self.gui.image_target.shape[0] == self.gui.image_reference.shape[0] and \
-                     self.gui.image_target.shape[1] == self.gui.image_reference.shape[1]:
+                        self.gui.image_target.shape[1] == self.gui.image_reference.shape[1]:
                     self.gui.image_rigid_transformed = self.gui.image_target
                 else:
                     # Input images have different size, issue error message and reset.
@@ -171,7 +175,7 @@ class Workflow(QtCore.QThread):
 
                 if self.gui.image_rigid_transformed.dtype == np.uint16:
                     self.gui.image_rigid_transformed_8bit = \
-                        (self.gui.image_rigid_transformed/256).astype('uint8')
+                        (self.gui.image_rigid_transformed / 256).astype('uint8')
                 else:
                     self.gui.image_rigid_transformed_8bit = self.gui.image_rigid_transformed
                 self.gui.image_rigid_transformed_8bit_gray = \
@@ -243,7 +247,7 @@ class Workflow(QtCore.QThread):
         using appropriate keypoints.
 
         :param homography_matrix: Homography matrix
-        :return: (scaling factor deviation, orthogonality violation)
+        :return: Tuple (scaling factor deviation, orthogonality violation)
         """
 
         # Define thre test vectors: One pointing at the origin, and the other two at points on the
@@ -272,7 +276,6 @@ class Workflow(QtCore.QThread):
         angle_error = np.rad2deg(
             np.arcsin(abs(np.dot(vec_1x_trans_normalized, vec_1y_trans_normalized))))
         return scale_error, angle_error
-
 
     def getPatch(self, image, ny, nx, j, i):
         """
@@ -310,7 +313,8 @@ class Workflow(QtCore.QThread):
         # If Gaussian filter is specified, set the flag accordingly. Compute the flow field.
         if self.configuration.use_gaussian_filter:
             flow = cv2.calcOpticalFlowFarneback(self.gui.image_reference_8bit_gray,
-                                                self.gui.image_rigid_transformed_8bit_gray, flow=None,
+                                                self.gui.image_rigid_transformed_8bit_gray,
+                                                flow=None,
                                                 pyr_scale=self.configuration.pyramid_scale,
                                                 levels=self.configuration.levels,
                                                 winsize=self.configuration.winsize,
@@ -320,7 +324,8 @@ class Workflow(QtCore.QThread):
                                                 flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN)
         else:
             flow = cv2.calcOpticalFlowFarneback(self.gui.image_reference_8bit_gray,
-                                                self.gui.image_rigid_transformed_8bit_gray, flow=None,
+                                                self.gui.image_rigid_transformed_8bit_gray,
+                                                flow=None,
                                                 pyr_scale=self.configuration.pyramid_scale,
                                                 levels=self.configuration.levels,
                                                 winsize=self.configuration.winsize,
@@ -361,7 +366,7 @@ class Workflow(QtCore.QThread):
         """
 
         if cv_image.dtype == np.uint16:
-            image_8b = (cv_image/256).astype('uint8')
+            image_8b = (cv_image / 256).astype('uint8')
         else:
             image_8b = cv_image
         return QtGui.QPixmap(
