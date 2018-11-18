@@ -122,8 +122,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
 
         self.status_busy = False
 
-        # Read in or (if no config file is found) create all configuration parameters. If a new
-        # configuration has been created, write it to disk.
+        # Create configuration object and set configuration parameters to standard values.
         self.configuration = Configuration()
 
         # Write the program version into the window title.
@@ -483,6 +482,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
         """
 
         error_dialog = QtWidgets.QErrorMessage(self)
+        error_dialog.setMinimumSize(400, 0)
+        error_dialog.setWindowTitle(self.configuration.version)
         error_dialog.showMessage(message)
 
     def closeEvent(self, evnt):
