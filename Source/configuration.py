@@ -36,7 +36,7 @@ class Configuration:
         """
 
         # The version number is displayed on the PSLA main GUI title line.
-        self.version = "Planetary System LRGB Aligner 0.5.0"
+        self.version = "Planetary System LRGB Aligner 0.5.1"
 
         # Set internal parameters which cannot be changed by the user.
         self.wait_for_workflow_initialization = 0.1
@@ -65,7 +65,7 @@ class Configuration:
         # image can be split in a grid of patches, and feature detection is done for each patch
         # separately. This leads to a more uniform feature distribution. This parameter specifies
         # the number of patches in y direction.
-        self.feature_patch_grid_size_y = 4    # between 1 and 10
+        self.feature_patch_grid_size_y = 3    # between 1 and 10
         # Number of patches in x direction for feature detection. Features are detected in each
         # patch separately. This leads to a more uniform feature distribution.
         self.feature_patch_grid_size_x = 3    # between 1 and 10

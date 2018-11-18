@@ -526,5 +526,5 @@ if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
     myapp = LrgbAligner()
-    myapp.show()
+    myapp.showMaximized()
     sys.exit(app.exec_())
