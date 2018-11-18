@@ -146,8 +146,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
     def edit_configuration(self):
         """
         This method is invoked with the "Set configuration parameters" GUI button. Open the
-        configuration editor. If the configuration is changed, set the flag which tells the
-        workflow thread to repeat the alignment process.
+        configuration editor. If the configuration is changed, reset the workflow status to
+        invalidate the computations done so far.
 
         :return: -
         """
@@ -171,6 +171,9 @@ class LrgbAligner(QtWidgets.QMainWindow):
             self.image_reference, self.image_reference_8bit_gray, self.image_reference_8bit_color = \
                 self.load_image("Load B/W reference image", 0, color=False)
             self.ui.radioShowBW.setChecked(True)
+
+            # Set the index of the image viewer to the B/W image. The pixmap with this index will
+            # be loaded into the viewer with the "set_status" method.
             self.current_pixmap_index = 0
             self.set_status(1)
         except:
