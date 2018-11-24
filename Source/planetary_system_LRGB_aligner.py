@@ -176,8 +176,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
             # be loaded into the viewer with the "set_status" method.
             self.current_pixmap_index = 0
             self.set_status(1)
-        except:
-            pass
+        except Exception as e:
+            self.show_error_message("Error in reading B/W image. Detailed message: " + str(e))
 
     def load_color_image(self):
         """
@@ -192,8 +192,8 @@ class LrgbAligner(QtWidgets.QMainWindow):
             self.ui.radioShowColorOrig.setChecked(True)
             self.current_pixmap_index = 1
             self.set_status(2)
-        except:
-            pass
+        except Exception as e:
+            self.show_error_message("Error in reading color image. Detailed message: " + str(e))
 
     def load_image(self, message, pixmap_index, color=False):
         """
