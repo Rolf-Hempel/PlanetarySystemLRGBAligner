@@ -331,8 +331,8 @@ class Workflow(QtCore.QThread):
                                                 winsize=self.configuration.winsize,
                                                 iterations=self.configuration.iterations,
                                                 poly_n=self.configuration.poly_n,
-                                                poly_sigma=self.configuration.poly_sigma)
-
+                                                poly_sigma=self.configuration.poly_sigma,
+                                                flags=0)
         # Apply the flow field.
         return self.warp_flow(self.gui.image_rigid_transformed, flow)
 
