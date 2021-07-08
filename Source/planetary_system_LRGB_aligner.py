@@ -214,6 +214,7 @@ class LrgbAligner(QtWidgets.QMainWindow):
         file_name = filename[0]
         if file_name == '':
             raise Exception("File dialog aborted")
+        
         # Remember the current directory for next file dialog.
         self.current_dir = str(Path(file_name).parents[0])
         if color:
