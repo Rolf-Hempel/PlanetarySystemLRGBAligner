@@ -110,7 +110,7 @@ class Window(QtWidgets.QWidget):
 
     def loadImage(self):
         # self.viewer.setPhoto(QtGui.QPixmap('2018-03-24_20-00MEZ_Mond_LRGB.jpg'))
-        image = cv2.imread('Images/2018-03-24_20-00MEZ_Mond.jpg')
+        image = cv2.imread('Images/Moon_Example_B-W.jpg')
         qt_image = QtGui.QImage(image, image.shape[1], image.shape[0], image.shape[1] * 3,
                                 QtGui.QImage.Format_RGB888).rgbSwapped()
         pixmap = QtGui.QPixmap(qt_image)

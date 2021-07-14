@@ -11,3 +11,6 @@ For this to work properly, both images first have to be registered pixel-wise wi
 PlanetarySystemLRGBAligner does this image registration automatically using a two phase approach: First, it computes a rigid homography mapping to match the color image approximately with the B/W image. In a second phase, an "optical flow" algorithm adjusts the registration of both images at every pixel location.
 
 As an add-on, when the registration is completed, PlanetarySystemLRGBAligner offers to combine both images into an LRGB composite.
+
+For a discussion of this software on the U.S. astronomy forum "Cloudy Nights" see: https://www.cloudynights.com/topic/640309-lrgb-composite-images-of-the-moon-or-planets/
+
